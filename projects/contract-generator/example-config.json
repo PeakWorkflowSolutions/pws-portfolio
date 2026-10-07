@@ -1,0 +1,30 @@
+{
+  "agreementTitle": "Website Design & Build Services Agreement",
+  "engagement": "Phase 1 — Website Design & Build",
+  "client": { "legalName": "Sample Client, LLC", "dba": "Sample Wellness Studio" },
+  "lineItems": [
+    {
+      "name": "Website Design & Build",
+      "description": "Custom-designed, responsive website built from the client's own provided content, including a request-to-book contact form.",
+      "timeline": null,
+      "price": 500
+    },
+    {
+      "name": "Missed-Call Lead Capture",
+      "description": "Missed calls trigger an AI inquiry check and an SMS reply with an intake form link; responses land in a Google Sheet.",
+      "timeline": null,
+      "price": 750
+    }
+  ],
+  "recurring": {
+    "included": "Monitoring of the delivered automations, fixes for breakage caused by connected-platform changes, and up to 2 hours per month of small adjustments.",
+    "responseTime": "2 business days",
+    "monthlyFee": null
+  },
+  "accessItems": [
+    { "system": "Website Hosting / Domain", "item": null, "purpose": "Publish and maintain the website" },
+    { "system": "Phone System", "item": null, "purpose": "Connect missed-call events to the lead capture workflow" },
+    { "system": "Google Workspace", "item": null, "purpose": "Intake form and response sheet" }
+  ],
+  "outputFile": "Sample_Services_Agreement.docx"
+}

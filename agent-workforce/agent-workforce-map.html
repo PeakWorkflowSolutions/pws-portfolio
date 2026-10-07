@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Workforce Map</title>
+<style>
+/* Layout concept: one horizontal swimlane flowchart per director — You / Director / Data —
+   process boxes, decision-shaped data cylinders, and terminal pills connected by orthogonal
+   arrows, drawn as inline SVG so the whole thing reads like a real flowchart. */
+:root{
+  --bg:#F6F4EF;
+  --surface:#FFFFFF;
+  --ink:#141A22;
+  --muted:#5A6472;
+  --line:#DCD7CB;
+  --navy:#001E47;
+  --blue:#2F8DD2;
+  --orange:#FE6701;
+  --green:#2E8B57;
+  --card-shadow: 0 1px 2px rgba(20,26,34,.06), 0 8px 24px rgba(20,26,34,.06);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12151B; --surface:#1B2029; --ink:#EDEEF2; --muted:#9AA3B2; --line:#2C3341;
+    --navy:#7FB0E8; --blue:#5AA6EA; --orange:#FF8A3D; --green:#4FBE85;
+    --card-shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 28px rgba(0,0,0,.4);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12151B; --surface:#1B2029; --ink:#EDEEF2; --muted:#9AA3B2; --line:#2C3341;
+  --navy:#7FB0E8; --blue:#5AA6EA; --orange:#FF8A3D; --green:#4FBE85;
+  --card-shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 28px rgba(0,0,0,.4);
+  color-scheme: dark;
+}
+
+*{box-sizing:border-box;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Manrope",system-ui,-apple-system,sans-serif;
+  padding-inline:16px;
+  padding-block:28px 60px;
+  max-width:1180px;
+  margin:0 auto;
+}
+h1,h2,h3{ font-family:"Poppins",system-ui,sans-serif; }
+
+.eyebrow{
+  font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--orange); font-weight:700;
+}
+h1{
+  font-size:clamp(1.5rem,4vw,2.15rem);
+  margin:.25em 0 .2em;
+  color:var(--navy);
+  font-weight:700;
+  text-wrap:balance;
+}
+.sub{
+  color:var(--muted);
+  font-size:.95rem;
+  max-width:66ch;
+  line-height:1.55;
+}
+
+.legend{
+  display:flex; flex-wrap:wrap; gap:10px 18px;
+  margin:18px 0 30px;
+  padding:14px 16px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:12px;
+  font-size:.78rem;
+  color:var(--muted);
+  box-shadow:var(--card-shadow);
+}
+.legend span{display:inline-flex; align-items:center; gap:7px;}
+.swatch{width:20px;height:12px;border-radius:3px;display:inline-block;flex:none;}
+.swatch.terminal{border-radius:6px;background:var(--orange);}
+.swatch.process{background:var(--surface);border:2px solid var(--navy);}
+.swatch.data{background:var(--surface);border:2px solid var(--green);border-radius:2px 2px 6px 6px;}
+.swatch.blocked{background:var(--surface);border:2px dashed var(--muted);}
+
+section.flow{ margin-bottom:38px; }
+.flow-head{ margin-bottom:12px; }
+.flow-head h2{
+  font-size:1.1rem; margin:0 0 3px; color:var(--navy);
+}
+.flow-head p{ margin:0; font-size:.82rem; color:var(--muted); line-height:1.5; max-width:70ch; }
+
+.flow-wrap{
+  overflow-x:auto;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:14px;
+  box-shadow:var(--card-shadow);
+  padding:6px;
+}
+.flow-wrap svg{ display:block; }
+
+footer.note{
+  margin-top:8px;
+  font-size:.74rem;
+  color:var(--muted);
+  line-height:1.6;
+  max-width:72ch;
+}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Manrope:wght@400;500;700&display=swap">
+
+<div class="eyebrow">Peak Workflow Solutions</div>
+<h1>Agent Workforce Map</h1>
+<p class="sub">Four directors, one flowchart each. Every lane is an actor — you, the director, or where the data lives — and every arrow is a real handoff: what triggers it, what it touches, and where it lands.</p>
+
+<div class="legend">
+  <span><span class="swatch terminal"></span>Start / end point — usually you, or a schedule</span>
+  <span><span class="swatch process"></span>A step the director does</span>
+  <span><span class="swatch data"></span>Data it reads or writes</span>
+  <span><span class="swatch blocked"></span>Conditional step</span>
+</div>
+
+<section class="flow" id="flow-sales">
+  <div class="flow-head">
+    <h2>Sales &amp; Outreach Director</h2>
+    <p>Runs the morning call packet, then logs whatever you tell it about how the calls went.</p>
+  </div>
+  <div class="flow-wrap"><div id="mount-sales"></div></div>
+</section>
+
+<section class="flow" id="flow-builder">
+  <div class="flow-head">
+    <h2>Builder Director</h2>
+    <p>Turns a scoped deal into a signable agreement, verifies it, and logs it to that client's own project.</p>
+  </div>
+  <div class="flow-wrap"><div id="mount-builder"></div></div>
+</section>
+
+<section class="flow" id="flow-marketing">
+  <div class="flow-head">
+    <h2>Marketing Director</h2>
+    <p>Keeps your voice consistent across bios, video, and site copy — still fully hands-on for approval.</p>
+  </div>
+  <div class="flow-wrap"><div id="mount-marketing"></div></div>
+</section>
+
+<section class="flow" id="flow-ops">
+  <div class="flow-head">
+    <h2>Accountability &amp; Ops</h2>
+    <p>The daily briefing and the memory layer.</p>
+  </div>
+  <div class="flow-wrap"><div id="mount-ops"></div></div>
+</section>
+
+<footer class="note">
+  Every diagram reads left to right. The top lane is always you, the middle lane is the director doing the work, and the bottom lane is whatever data it reads from or writes to. Nothing crosses into a public post, a signed contract, or a payment without a box in the "You" lane first.
+</footer>
+
+<script>
+(function(){
+  var NS = 'http://www.w3.org/2000/svg';
+  var STYLE = getComputedStyle(document.documentElement);
+  function cssVar(name){ return 'var(' + name + ')'; }
+
+  var LANE_COLOR = ['var(--orange)','var(--navy)','var(--green)'];
+  var LANE_FILL_TINT = ['color-mix(in srgb, var(--orange) 10%, var(--surface))',
+                         'color-mix(in srgb, var(--navy) 7%, var(--surface))',
+                         'color-mix(in srgb, var(--green) 9%, var(--surface))'];
+
+  function el(tag, attrs){
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  function addDefs(svg){
+    var defs = el('defs',{});
+    var marker = el('marker',{id:'arrow', viewBox:'0 0 10 10', refX:'8.5', refY:'5',
+      markerWidth:'7', markerHeight:'7', orient:'auto-start-reverse'});
+    marker.appendChild(el('path',{d:'M0,0 L10,5 L0,10 Z', fill:'var(--muted)'}));
+    defs.appendChild(marker);
+    var markerD = el('marker',{id:'arrowd', viewBox:'0 0 10 10', refX:'8.5', refY:'5',
+      markerWidth:'7', markerHeight:'7', orient:'auto-start-reverse'});
+    markerD.appendChild(el('path',{d:'M0,0 L10,5 L0,10 Z', fill:'var(--muted)', opacity:'.6'}));
+    defs.appendChild(markerD);
+    svg.appendChild(defs);
+  }
+
+  function addText(parent, x, y, lines, opts){
+    opts = opts || {};
+    var t = el('text',{x:x, y:y, 'text-anchor':'middle',
+      'font-family':'Manrope,system-ui,sans-serif',
+      'font-size': opts.size || '12.5',
+      'font-weight': opts.weight || '700',
+      fill: opts.color || 'var(--ink)'});
+    var n = lines.length;
+    var startDy = -((n-1) * 7.5);
+    lines.forEach(function(line,i){
+      var ts = el('tspan',{x:x, dy: i===0 ? startDy : 15});
+      ts.textContent = line;
+      t.appendChild(ts);
+    });
+    parent.appendChild(t);
+  }
+
+  function edgeLabel(parent, x, y, text){
+    var t = el('text',{x:x, y:y, 'text-anchor':'middle',
+      'font-family':'Manrope,system-ui,sans-serif','font-size':'10.5','font-weight':'700',
+      fill:'var(--muted)', 'paint-order':'stroke', stroke:'var(--surface)', 'stroke-width':'5'});
+    t.textContent = text;
+    parent.appendChild(t);
+  }
+
+  function shapeProcess(g, n){
+    var r = el('rect',{x:n.cx-n.w/2, y:n.cy-n.h/2, width:n.w, height:n.h, rx:10,
+      fill:'var(--surface)', stroke: LANE_COLOR[n.lane], 'stroke-width':'2'});
+    g.appendChild(r);
+    addText(g, n.cx, n.cy + (n.label.length>1? -2: 4), n.label, {size:'12.5'});
+  }
+
+  function shapeTerminal(g, n){
+    var r = el('rect',{x:n.cx-n.w/2, y:n.cy-n.h/2, width:n.w, height:n.h, rx:n.h/2,
+      fill: n.lane===0 ? 'var(--orange)' : 'var(--navy)', stroke:'none'});
+    g.appendChild(r);
+    addText(g, n.cx, n.cy + (n.label.length>1? -2: 4), n.label, {size:'12', color:'#fff'});
+  }
+
+  function shapeData(g, n){
+    var rx = n.w/2, ry = 9;
+    var top = n.cy - n.h/2, bottom = n.cy + n.h/2;
+    var x0 = n.cx - rx, x1 = n.cx + rx;
+    var body = el('path',{d:
+      'M'+x0+','+(top+ry)+
+      ' L'+x0+','+(bottom-ry)+
+      ' A'+rx+','+ry+' 0 0 0 '+x1+','+(bottom-ry)+
+      ' L'+x1+','+(top+ry)+
+      ' A'+rx+','+ry+' 0 0 0 '+x0+','+(top+ry)+' Z',
+      fill:'var(--surface)', stroke:'var(--green)', 'stroke-width':'2'});
+    g.appendChild(body);
+    var lid = el('ellipse',{cx:n.cx, cy:top+ry, rx:rx, ry:ry,
+      fill:'var(--surface)', stroke:'var(--green)', 'stroke-width':'2'});
+    g.appendChild(lid);
+    addText(g, n.cx, n.cy + 4 + (n.label.length>1? 4:0), n.label, {size:'11.5'});
+  }
+
+  function shapeBlocked(g, n){
+    var r = el('rect',{x:n.cx-n.w/2, y:n.cy-n.h/2, width:n.w, height:n.h, rx:10,
+      fill:'var(--surface)', stroke:'var(--muted)', 'stroke-width':'2', 'stroke-dasharray':'6 4'});
+    g.appendChild(r);
+    addText(g, n.cx, n.cy + (n.label.length>1? -2: 4), n.label, {size:'12', color:'var(--muted)'});
+  }
+
+  var SHAPES = {process:shapeProcess, terminal:shapeTerminal, data:shapeData, blocked:shapeBlocked};
+
+  function renderFlow(mountId, cfg){
+    var mount = document.getElementById(mountId);
+    var colW = cfg.colW || 190, laneH = cfg.laneH || 120, margin = 24, labelW = 168;
+    var cols = cfg.cols;
+    var width = margin*2 + labelW + cols*colW;
+    var height = margin*2 + cfg.lanes.length*laneH;
+
+    var svg = el('svg',{viewBox:'0 0 '+width+' '+height, width:width, height:height});
+    addDefs(svg);
+
+    // lane bands + labels
+    cfg.lanes.forEach(function(lane, i){
+      var y = margin + i*laneH;
+      var band = el('rect',{x:margin, y:y, width:width-margin*2, height:laneH,
+        fill: LANE_FILL_TINT[i], stroke:'var(--line)', 'stroke-width':'1'});
+      svg.appendChild(band);
+      var chip = el('rect',{x:margin, y:y, width:labelW, height:laneH, fill:LANE_COLOR[i]});
+      svg.appendChild(chip);
+      var t = el('text',{x:margin+16, y:y+laneH/2+4, 'text-anchor':'start',
+        'font-family':'Poppins,system-ui,sans-serif','font-size':'13.5','font-weight':'700',
+        fill:'#fff'});
+      t.textContent = lane.label;
+      svg.appendChild(t);
+    });
+
+    // divider between label column and plot area
+    svg.appendChild(el('line',{x1:margin+labelW, y1:margin, x2:margin+labelW, y2:height-margin,
+      stroke:'var(--line)', 'stroke-width':'1'}));
+
+    var byId = {};
+    cfg.nodes.forEach(function(n){
+      n.cx = margin + labelW + n.col*colW + colW/2;
+      n.cy = margin + n.lane*laneH + laneH/2;
+      n.w = n.w || 150;
+      n.h = n.h || (n.type==='terminal' ? 46 : n.type==='data' ? 56 : 50);
+      byId[n.id] = n;
+    });
+
+    var edgeLayer = el('g',{});
+    svg.appendChild(edgeLayer);
+
+    cfg.edges.forEach(function(e){
+      var a = byId[e.from], b = byId[e.to];
+      var pts;
+      if (a.lane === b.lane){
+        if (b.col >= a.col){
+          pts = [[a.cx+a.w/2, a.cy],[b.cx-b.w/2, b.cy]];
+        } else {
+          var topY = margin - 14;
+          pts = [[a.cx, a.cy-a.h/2],[a.cx, topY],[b.cx, topY],[b.cx, b.cy-b.h/2]];
+        }
+      } else {
+        var down = b.lane > a.lane;
+        var ay = down ? a.cy+a.h/2 : a.cy-a.h/2;
+        var by = down ? b.cy-b.h/2 : b.cy+b.h/2;
+        if (a.cx === b.cx){
+          pts = [[a.cx, ay],[b.cx, by]];
+        } else {
+          var midY = (ay+by)/2;
+          pts = [[a.cx, ay],[a.cx, midY],[b.cx, midY],[b.cx, by]];
+        }
+      }
+      var d = 'M' + pts.map(function(p){return p[0]+','+p[1];}).join(' L');
+      var path = el('path',{d:d, fill:'none',
+        stroke: e.blocked ? 'var(--muted)' : 'var(--muted)',
+        'stroke-width': e.blocked ? '2' : '2',
+        'stroke-dasharray': e.blocked ? '6 4' : 'none',
+        'marker-end': 'url(#arrow)'});
+      edgeLayer.appendChild(path);
+      if (e.label){
+        var mid = pts[Math.floor((pts.length-1)/2)];
+        var mid2 = pts[Math.ceil((pts.length-1)/2)];
+        var lx = (mid[0]+mid2[0])/2, ly = (mid[1]+mid2[1])/2 - 6;
+        edgeLabel(edgeLayer, lx, ly, e.label);
+      }
+    });
+
+    var nodeLayer = el('g',{});
+    svg.appendChild(nodeLayer);
+    cfg.nodes.forEach(function(n){ SHAPES[n.type](nodeLayer, n); });
+
+    mount.appendChild(svg);
+  }
+
+  var LANES3 = [{label:'You'},{label:'Director'},{label:'Data'}];
+
+  renderFlow('mount-sales', {
+    cols:8,
+    lanes:[{label:'You'},{label:'Sales & Outreach'},{label:'Data'}],
+    nodes:[
+      {id:'s-trig', lane:1, col:0, type:'terminal', label:['6:45am','Mon–Fri']},
+      {id:'s-pull', lane:1, col:1, type:'process', label:["Pull today's","leads"]},
+      {id:'s-notion1', lane:2, col:1, type:'data', label:['Notion —','Prospects DB']},
+      {id:'s-audit', lane:1, col:2, type:'process', label:['Research audit','(parallel agents)']},
+      {id:'s-docs1', lane:2, col:2, type:'data', label:['Claude Docs —','pain points & voice']},
+      {id:'s-packet', lane:1, col:3, type:'process', label:['Build call','packet']},
+      {id:'s-deliver', lane:1, col:4, type:'process', label:['Deliver','packet']},
+      {id:'s-email', lane:2, col:4, type:'data', label:['Email']},
+      {id:'s-call', lane:0, col:5, type:'terminal', label:['You call','the leads']},
+      {id:'s-report', lane:0, col:6, type:'process', label:['You report','the outcome']},
+      {id:'s-update', lane:1, col:6, type:'process', label:['Update Notion','record']},
+      {id:'s-notion2', lane:2, col:6, type:'data', label:['Notion —','Prospects DB']},
+      {id:'s-confirm', lane:1, col:7, type:'terminal', label:['Confirm back','to you']},
+      {id:'s-seen', lane:0, col:7, type:'terminal', label:['You see the','confirmation']}
+    ],
+    edges:[
+      {from:'s-trig', to:'s-pull'},
+      {from:'s-pull', to:'s-notion1', label:'reads'},
+      {from:'s-pull', to:'s-audit'},
+      {from:'s-audit', to:'s-docs1', label:'reads'},
+      {from:'s-audit', to:'s-packet'},
+      {from:'s-packet', to:'s-deliver'},
+      {from:'s-deliver', to:'s-email', label:'sends'},
+      {from:'s-deliver', to:'s-call'},
+      {from:'s-call', to:'s-report'},
+      {from:'s-report', to:'s-update'},
+      {from:'s-update', to:'s-notion2', label:'writes'},
+      {from:'s-update', to:'s-confirm'},
+      {from:'s-confirm', to:'s-seen'}
+    ]
+  });
+
+  renderFlow('mount-builder', {
+    cols:6,
+    lanes:[{label:'You'},{label:'Builder'},{label:'Data'}],
+    nodes:[
+      {id:'b-start', lane:0, col:0, type:'terminal', label:['New client','ready']},
+      {id:'b-scope', lane:1, col:1, type:'process', label:['Gather real','scope']},
+      {id:'b-src', lane:2, col:1, type:'data', label:["Client's project",'+ email']},
+      {id:'b-build', lane:1, col:2, type:'process', label:['Build agreement','(docx)']},
+      {id:'b-verify', lane:1, col:3, type:'process', label:['Verify — render','& check']},
+      {id:'b-deliver', lane:1, col:4, type:'process', label:['Deliver','to you']},
+      {id:'b-review', lane:0, col:4, type:'terminal', label:['You review, send','to client']},
+      {id:'b-log', lane:1, col:5, type:'process', label:['Log build','& pricing']},
+      {id:'b-projlog', lane:2, col:5, type:'data', label:['Client project','log']}
+    ],
+    edges:[
+      {from:'b-start', to:'b-scope'},
+      {from:'b-scope', to:'b-src', label:'reads'},
+      {from:'b-scope', to:'b-build'},
+      {from:'b-build', to:'b-verify'},
+      {from:'b-verify', to:'b-deliver'},
+      {from:'b-deliver', to:'b-review'},
+      {from:'b-deliver', to:'b-log'},
+      {from:'b-log', to:'b-projlog', label:'writes'}
+    ]
+  });
+
+  renderFlow('mount-marketing', {
+    cols:6,
+    lanes:[{label:'You'},{label:'Marketing'},{label:'Data'}],
+    nodes:[
+      {id:'m-start', lane:0, col:0, type:'terminal', label:['Notes or','a request']},
+      {id:'m-ref', lane:1, col:1, type:'process', label:['Check reference','library']},
+      {id:'m-docs', lane:2, col:1, type:'data', label:['Claude Docs — pain','points, voice, handoff']},
+      {id:'m-plan', lane:1, col:2, type:'process', label:['Shape the','plan']},
+      {id:'m-copy', lane:1, col:3, type:'process', label:['Draft website','copy']},
+      {id:'m-projdoc', lane:2, col:3, type:'data', label:['PWS Project','Doc']},
+      {id:'m-publish', lane:1, col:4, type:'process', label:['Publish to','pwslocal.com']},
+      {id:'m-netlify', lane:2, col:4, type:'data', label:['Netlify','hosting']},
+      {id:'m-review', lane:0, col:5, type:'terminal', label:['You review','& approve']}
+    ],
+    edges:[
+      {from:'m-start', to:'m-ref'},
+      {from:'m-ref', to:'m-docs', label:'reads'},
+      {from:'m-ref', to:'m-plan'},
+      {from:'m-plan', to:'m-copy'},
+      {from:'m-copy', to:'m-projdoc', label:'writes'},
+      {from:'m-copy', to:'m-publish'},
+      {from:'m-publish', to:'m-netlify', label:'deploys'},
+      {from:'m-copy', to:'m-review'}
+    ]
+  });
+
+  renderFlow('mount-ops', {
+    cols:4,
+    lanes:[{label:'You'},{label:'Ops'},{label:'Data'}],
+    nodes:[
+      {id:'o-zap', lane:1, col:0, type:'process', label:['Daily briefing','(weekdays)']},
+      {id:'o-zapdata', lane:2, col:0, type:'data', label:['Notion projects,','tasks, prospects']},
+      {id:'o-you', lane:0, col:0, type:'terminal', label:['Briefing email','with call list']},
+      {id:'o-ask', lane:0, col:1, type:'terminal', label:['You ask for','a site check']},
+      {id:'o-audit', lane:1, col:2, type:'process', label:['AI discoverability','audit']},
+      {id:'o-site', lane:2, col:2, type:'data', label:['pwslocal.com']},
+      {id:'o-log', lane:1, col:3, type:'process', label:['Write findings to','master log']},
+      {id:'o-projdoc', lane:2, col:3, type:'data', label:['PWS Project','Doc']}
+    ],
+    edges:[
+      {from:'o-zap', to:'o-zapdata', label:'reads'},
+      {from:'o-zap', to:'o-you', label:'sends'},
+      {from:'o-ask', to:'o-audit'},
+      {from:'o-audit', to:'o-site', label:'reads'},
+      {from:'o-audit', to:'o-log'},
+      {from:'o-log', to:'o-projdoc', label:'writes'}
+    ]
+  });
+})();
+</script>

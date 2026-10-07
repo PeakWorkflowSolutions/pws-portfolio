@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Missed Call Cost</title>
+<style>
+  :root{
+    --brand-navy:#001E47;
+    --brand-orange:#FE6701;
+    --bg:#F5F7FA;
+    --surface:#FFFFFF;
+    --border:#DDE3EA;
+    --text:#001E47;
+    --text-soft:#5A6472;
+    --accent:#2F8DD2;
+    --accent-soft:#EAF3FB;
+    --highlight:#FE6701;
+    --highlight-soft:#FFF1E6;
+    --track:#E3E8EE;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0A1626;
+      --surface:#0F1E33;
+      --border:#1E3350;
+      --text:#EAF1FA;
+      --text-soft:#93A6BD;
+      --accent:#5BA8E8;
+      --accent-soft:#132A43;
+      --highlight:#FF9448;
+      --highlight-soft:#2B1B10;
+      --track:#1C2E48;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0A1626;
+    --surface:#0F1E33;
+    --border:#1E3350;
+    --text:#EAF1FA;
+    --text-soft:#93A6BD;
+    --accent:#5BA8E8;
+    --accent-soft:#132A43;
+    --highlight:#FF9448;
+    --highlight-soft:#2B1B10;
+    --track:#1C2E48;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Public Sans", -apple-system, sans-serif;
+    padding-inline:16px;
+    padding-block:32px;
+    display:flex;
+    justify-content:center;
+  }
+  .page{ width:100%; max-width:520px; display:flex; flex-direction:column; gap:20px; }
+
+  .hook-band{
+    background:var(--brand-navy);
+    border-radius:14px;
+    padding:20px 22px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .hook-tag{
+    font-family:"Montserrat", sans-serif;
+    font-weight:900;
+    font-size:clamp(21px, 6vw, 27px);
+    line-height:1.15;
+    color:var(--brand-orange);
+    text-transform:uppercase;
+    letter-spacing:.01em;
+    text-wrap:balance;
+  }
+  .hook-sub{
+    font-family:"Public Sans", sans-serif;
+    font-size:14px;
+    line-height:1.5;
+    color:#DCE6F2;
+  }
+
+  header{ display:flex; flex-direction:column; gap:6px; }
+  .eyebrow{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--accent);
+  }
+  h1{
+    font-family:"Montserrat", sans-serif;
+    font-weight:900;
+    font-size:clamp(26px, 6vw, 34px);
+    line-height:1.15;
+    margin:0;
+    text-wrap:balance;
+  }
+  .sub{ color:var(--text-soft); font-size:15px; line-height:1.5; margin:0; }
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:22px;
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+  }
+
+  .field{ display:flex; flex-direction:column; gap:10px; }
+  .field-top{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+  .field label{ font-size:14px; font-weight:600; }
+  .field .hint{ font-size:12px; color:var(--text-soft); }
+  .value-pill{
+    font-family:"IBM Plex Mono", monospace;
+    font-variant-numeric:tabular-nums;
+    font-size:15px;
+    font-weight:600;
+    color:var(--accent);
+    background:var(--accent-soft);
+    padding:3px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+
+  input[type="range"]{
+    -webkit-appearance:none;
+    appearance:none;
+    width:100%;
+    height:6px;
+    border-radius:999px;
+    background:var(--track);
+    outline:none;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:20px; height:20px;
+    border-radius:50%;
+    background:var(--accent);
+    border:3px solid var(--surface);
+    box-shadow:0 0 0 1px var(--border);
+    cursor:pointer;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:20px; height:20px;
+    border-radius:50%;
+    background:var(--accent);
+    border:3px solid var(--surface);
+    box-shadow:0 0 0 1px var(--border);
+    cursor:pointer;
+  }
+
+  .dollar-input{
+    display:flex; align-items:center; gap:8px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 14px;
+    background:var(--bg);
+  }
+  .dollar-input span{ color:var(--text-soft); font-family:"IBM Plex Mono", monospace; }
+  .dollar-input input{
+    border:none; background:transparent; outline:none;
+    font-family:"IBM Plex Mono", monospace;
+    font-size:17px; font-weight:600; color:var(--text);
+    width:100%; min-width:0;
+    font-variant-numeric:tabular-nums;
+  }
+
+  .result{
+    background:var(--highlight-soft);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:22px;
+    display:flex; flex-direction:column; gap:16px;
+  }
+  .result-row{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+  .result-row .label{ font-size:13px; color:var(--text-soft); }
+  .result-row .num{
+    font-family:"IBM Plex Mono", monospace;
+    font-variant-numeric:tabular-nums;
+    font-size:16px; font-weight:600;
+  }
+  .result-row.main .label{ font-size:14px; font-weight:600; color:var(--text); }
+  .result-row.main .num{ font-size:30px; font-weight:700; color:var(--highlight); }
+  .divider{ height:1px; background:var(--border); }
+
+  .note{
+    font-size:13px; line-height:1.6; color:var(--text-soft);
+  }
+  .note b{ color:var(--text); }
+
+  footer{
+    font-size:13px; line-height:1.6; color:var(--text-soft);
+    border-top:1px solid var(--border);
+    padding-top:18px;
+  }
+  footer b{ color:var(--text); }
+</style>
+
+<div class="page">
+
+  <div class="hook-band">
+    <div class="hook-tag">Where do your leads go?</div>
+    <div class="hook-sub">Every missed call goes somewhere. Usually not back to you.</div>
+  </div>
+
+  <header>
+    <div class="eyebrow">Peak Workflow Solutions</div>
+    <h1>What are missed calls actually costing you?</h1>
+    <p class="sub">Three numbers, all yours to set. No industry average assumed for you, just your own math made visible.</p>
+  </header>
+
+  <div class="card">
+
+    <div class="field">
+      <div class="field-top">
+        <label for="jobValue">Average job value</label>
+      </div>
+      <div class="dollar-input">
+        <span>$</span>
+        <input type="number" id="jobValue" value="350" min="0" step="1" inputmode="decimal">
+      </div>
+      <div class="hint">What one typical job or booking is worth to you.</div>
+    </div>
+
+    <div class="field">
+      <div class="field-top">
+        <label for="missedCalls">Missed calls per week</label>
+        <span class="value-pill" id="missedCallsOut">5</span>
+      </div>
+      <input type="range" id="missedCalls" min="0" max="30" value="5" step="1">
+      <div class="hint">Calls, texts, or form fills that never got a timely follow-up.</div>
+    </div>
+
+    <div class="field">
+      <div class="field-top">
+        <label for="captureRate">Of those, how many would've booked?</label>
+        <span class="value-pill" id="captureRateOut">20%</span>
+      </div>
+      <input type="range" id="captureRate" min="0" max="100" value="20" step="5">
+      <div class="hint">Your own honest estimate, not a claimed conversion rate.</div>
+    </div>
+
+  </div>
+
+  <div class="result">
+    <div class="result-row main">
+      <span class="label">Estimated lost revenue per week</span>
+      <span class="num" id="weeklyLoss">$0</span>
+    </div>
+    <div class="divider"></div>
+    <div class="result-row">
+      <span class="label">Per month</span>
+      <span class="num" id="monthlyLoss">$0</span>
+    </div>
+    <div class="result-row">
+      <span class="label">Per year</span>
+      <span class="num" id="yearlyLoss">$0</span>
+    </div>
+  </div>
+
+  <p class="note">This is simple multiplication off the numbers you set above, job value &times; missed calls &times; your own estimated capture rate. It's not a published statistic, it's your business, run through basic math so the cost of a missed call stops being abstract.</p>
+
+  <footer>
+    <b>If that yearly number is bigger than you expected,</b> that's usually the moment a missed-call lead capture system earns its cost back fast. Peak Workflow Solutions builds these for Yakima County businesses, one call at a time, no fixed package required.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  function fmt(n){
+    return "$" + Math.round(n).toLocaleString("en-US");
+  }
+
+  var jobValue = document.getElementById("jobValue");
+  var missedCalls = document.getElementById("missedCalls");
+  var captureRate = document.getElementById("captureRate");
+  var missedCallsOut = document.getElementById("missedCallsOut");
+  var captureRateOut = document.getElementById("captureRateOut");
+  var weeklyLoss = document.getElementById("weeklyLoss");
+  var monthlyLoss = document.getElementById("monthlyLoss");
+  var yearlyLoss = document.getElementById("yearlyLoss");
+
+  function clampNonNegative(v){
+    var n = parseFloat(v);
+    if (isNaN(n) || n < 0) return 0;
+    return n;
+  }
+
+  function recalc(){
+    var job = clampNonNegative(jobValue.value);
+    var calls = clampNonNegative(missedCalls.value);
+    var rate = clampNonNegative(captureRate.value) / 100;
+
+    missedCallsOut.textContent = calls.toString();
+    captureRateOut.textContent = Math.round(rate * 100) + "%";
+
+    var weekly = job * calls * rate;
+    var monthly = weekly * 4.33;
+    var yearly = weekly * 52;
+
+    weeklyLoss.textContent = fmt(weekly);
+    monthlyLoss.textContent = fmt(monthly);
+    yearlyLoss.textContent = fmt(yearly);
+  }
+
+  [jobValue, missedCalls, captureRate].forEach(function(el){
+    el.addEventListener("input", recalc);
+  });
+
+  recalc();
+})();
+</script>
