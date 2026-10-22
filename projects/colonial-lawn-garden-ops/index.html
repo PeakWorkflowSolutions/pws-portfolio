@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colonial Lawn & Garden Ops</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green-900:#173d2a; --green-800:#1f4f37; --green-700:#2a6447; --green-100:#e3efe7; --green-50:#f1f7f3;
+  --brass:#b8893a; --brass-100:#f6ecd9;
+  --bg:#f5f3ee; --surface:#ffffff; --surface-2:#faf9f6; --line:#e3e0d8;
+  --text:#1d231f; --muted:#646b66;
+  --blue:#2f6db5; --blue-100:#e3edf9;
+  --amber:#b7791f; --amber-100:#fbf0dc;
+  --red:#b3412f; --red-100:#f8e2de;
+  --gray-100:#eeede9;
+  --radius:12px; --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 14px rgba(0,0,0,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,-apple-system,Segoe UI,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,h4{margin:0;line-height:1.2}
+.brand-font{font-family:"Libre Baskerville",Georgia,serif}
+
+/* ---------- top bar ---------- */
+header.top{background:var(--green-900);color:#fff;position:sticky;top:0;z-index:20}
+.top-inner{max-width:1280px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;margin-right:auto}
+.logo-mark{width:34px;height:34px;border-radius:50%;background:var(--brass);display:grid;place-items:center;color:var(--green-900);font-weight:700}
+.logo-text{font-size:17px;letter-spacing:.2px}
+.logo-sub{font-size:11px;opacity:.75;letter-spacing:.6px;text-transform:uppercase}
+.demo-pill{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);font-size:11px;padding:3px 9px;border-radius:999px;letter-spacing:.3px}
+.reset-btn{background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
+.reset-btn:hover{background:rgba(255,255,255,.1)}
+nav.roles{background:var(--green-800);overflow-x:auto}
+.roles-inner{max-width:1280px;margin:0 auto;padding:0 16px;display:flex;gap:4px}
+.role-tab{background:none;border:0;color:rgba(255,255,255,.75);padding:11px 14px;cursor:pointer;font-weight:500;white-space:nowrap;border-bottom:3px solid transparent}
+.role-tab:hover{color:#fff}
+.role-tab.active{color:#fff;border-bottom-color:var(--brass)}
+.role-tab .ct{background:var(--brass);color:var(--green-900);border-radius:999px;font-size:11px;padding:0 6px;margin-left:6px;font-weight:700}
+
+main{max-width:1280px;margin:0 auto;padding:20px 16px 60px}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.page-head h2{font-size:22px}
+.page-head p{margin:4px 0 0;color:var(--muted)}
+
+/* ---------- generic ---------- */
+.card{min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card-pad{padding:16px}
+.card h3{font-size:15px;margin-bottom:10px}
+.grid{display:grid;gap:16px}
+.g-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g-side{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+@media (max-width:900px){.g-2,.g-3,.g-side{grid-template-columns:minmax(0,1fr)}.g-4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.row{display:flex;align-items:center;gap:8px;min-width:0}
+.row.between{flex-wrap:wrap}
+.between{justify-content:space-between}
+.wrap{flex-wrap:wrap}
+.stack>*+*{margin-top:10px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:8px 14px;cursor:pointer;font-weight:600;font-size:13px}
+.btn:hover{background:var(--surface-2)}
+.btn-primary{background:var(--green-700);border-color:var(--green-700);color:#fff}
+.btn-primary:hover{background:var(--green-800)}
+.btn-danger{background:var(--red);border-color:var(--red);color:#fff}
+.btn-danger:hover{filter:brightness(.95);background:var(--red)}
+.btn-big{width:100%;padding:16px;font-size:16px;border-radius:12px}
+.btn-sm{padding:5px 10px;font-size:12px}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.b-green{background:var(--green-100);color:var(--green-800)}
+.b-blue{background:var(--blue-100);color:var(--blue)}
+.b-amber{background:var(--amber-100);color:var(--amber)}
+.b-red{background:var(--red-100);color:var(--red)}
+.b-gray{background:var(--gray-100);color:var(--muted)}
+.b-brass{background:var(--brass-100);color:#7d5a1d}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.pulse{background:#3cb371;box-shadow:0 0 0 0 rgba(60,179,113,.6);animation:pulse 1.6s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 8px rgba(60,179,113,0)}100%{box-shadow:0 0 0 0 rgba(60,179,113,0)}}
+input[type=text],input[type=date],input[type=search],select,textarea{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px}
+textarea{min-height:80px;resize:vertical}
+label.f{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);font-weight:600}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr.click{cursor:pointer}
+tr.click:hover td{background:var(--surface-2)}
+tr.sel td{background:var(--green-50)}
+.table-wrap{overflow-x:auto}
+.kpi .n{font-size:28px;font-weight:700;letter-spacing:-.5px}
+.kpi .l{color:var(--muted);font-size:12px;font-weight:500}
+.progress{height:8px;background:var(--gray-100);border-radius:999px;overflow:hidden}
+.progress>i{display:block;height:100%;background:var(--green-700);border-radius:999px;transition:width .3s}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.note{background:var(--brass-100);border:1px solid #ecd9b4;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#5e4415}
+
+/* ---------- technician phone ---------- */
+.tech-layout{display:grid;grid-template-columns:420px minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:900px){.tech-layout{grid-template-columns:1fr}}
+.phone{background:#111;border-radius:38px;padding:12px;box-shadow:0 20px 50px rgba(0,0,0,.18);max-width:420px;width:100%;margin:0 auto}
+.phone-screen{background:var(--bg);border-radius:28px;overflow:hidden;height:760px;display:flex;flex-direction:column}
+@media (max-width:500px){.phone{padding:0;border-radius:16px;background:none;box-shadow:none}.phone-screen{border-radius:16px;height:auto;min-height:600px;border:1px solid var(--line)}}
+.app-head{background:var(--green-800);color:#fff;padding:16px 16px 14px}
+.app-head .hi{font-size:12px;opacity:.8}
+.app-head .nm{font-size:18px;font-weight:700}
+.app-body{flex:1;overflow-y:auto;padding:14px}
+.job-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;position:relative}
+.job-card+.job-card{margin-top:10px}
+.job-card:hover{border-color:var(--green-700)}
+.job-card .t{font-weight:700;font-size:15px}
+.job-card.active{border:2px solid #3cb371}
+.timer{font-variant-numeric:tabular-nums;font-size:38px;font-weight:700;letter-spacing:-1px;text-align:center}
+.svc{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line)}
+.svc:last-child{border-bottom:0}
+.check{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.check:last-child{border-bottom:0}
+.box{width:20px;height:20px;border-radius:6px;border:2px solid var(--line);flex:none;display:grid;place-items:center;margin-top:1px}
+.check.done .box{background:var(--green-700);border-color:var(--green-700)}
+.check.done .box::after{content:"";width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.check.done .lbl{text-decoration:line-through;color:var(--muted)}
+.back{background:none;border:0;color:#fff;padding:0;cursor:pointer;font-size:13px;opacity:.85;margin-bottom:6px}
+.app-tabs{display:flex;border-top:1px solid var(--line);background:var(--surface)}
+.app-tabs button{flex:1;background:none;border:0;padding:10px 0 12px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer}
+.app-tabs button.on{color:var(--green-700)}
+.app-tabs .ic{display:block;font-size:18px;margin-bottom:2px}
+.explain h3{font-size:18px;margin-bottom:8px}
+.explain ol{padding-left:18px;margin:8px 0}
+.explain li{margin:6px 0}
+
+/* ---------- schedule grid ---------- */
+.sched{display:grid;grid-template-columns:140px repeat(6,minmax(120px,1fr));min-width:900px}
+.sched>div{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:8px;min-height:64px}
+.sched .hd{background:var(--surface-2);font-weight:600;font-size:12px;min-height:auto}
+.sched .hd.today{background:var(--green-100);color:var(--green-800)}
+.sched .tn{font-weight:600;background:var(--surface-2)}
+.chip{display:block;width:100%;text-align:left;border:0;border-left:3px solid var(--green-700);background:var(--green-50);border-radius:6px;padding:5px 7px;font-size:11.5px;margin-bottom:5px;cursor:pointer;line-height:1.3}
+.chip:hover{filter:brightness(.97)}
+.chip.s-in_progress{border-left-color:#3cb371;background:#e2f5e9}
+.chip.s-done{border-left-color:#9aa39d;background:var(--gray-100);color:var(--muted)}
+.chip.s-scheduled{border-left-color:var(--blue);background:var(--blue-100)}
+
+/* ---------- kanban ---------- */
+.kanban{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:12px;overflow-x:auto}
+.col{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:200px}
+.col h4{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:2px 4px 10px;display:flex;justify-content:space-between}
+.tk{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer}
+.tk:hover{border-color:var(--green-700)}
+.tk .id{font-size:11px;color:var(--muted);font-weight:600}
+.tk .tt{font-weight:600;margin:3px 0 6px}
+
+/* ---------- reception ---------- */
+.transcript{max-height:380px;overflow-y:auto;padding-right:4px}
+.line{display:flex;gap:10px;margin-bottom:10px}
+.line .who{flex:none;width:76px;font-size:11px;font-weight:700;color:var(--muted);padding-top:2px;text-transform:uppercase;letter-spacing:.3px}
+.line.rec .who{color:var(--green-700)}
+.line .txt{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;flex:1}
+.line.rec .txt{background:var(--green-50);border-color:#cfe3d6}
+mark{background:#ffe79a;padding:0 1px;border-radius:2px}
+.player{display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.play{width:32px;height:32px;border-radius:50%;border:0;background:var(--green-700);color:#fff;cursor:pointer;flex:none}
+.wave{flex:1;display:flex;align-items:center;gap:2px;height:30px}
+.wave i{flex:1;background:#b9cfc1;border-radius:2px}
+.wave i.p{background:var(--green-700)}
+.rec-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px 4px 4px;cursor:pointer;font-size:12.5px;font-weight:600}
+.rec-chip.on{border-color:var(--green-700);background:var(--green-50)}
+.av{width:24px;height:24px;border-radius:50%;background:var(--green-700);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;flex:none}
+
+/* ---------- modal & toast ---------- */
+.modal-bg{position:fixed;inset:0;background:rgba(20,30,24,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border-radius:14px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.modal-body{padding:18px}
+.x{background:none;border:0;font-size:22px;cursor:pointer;color:var(--muted);line-height:1}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green-900);color:#fff;padding:10px 16px;border-radius:10px;opacity:0;transition:.25s;z-index:60;pointer-events:none;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:6px 12px;font-size:13px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="logo">
+      <div class="logo-mark brand-font">C</div>
+      <div>
+        <div class="logo-text brand-font">Colonial Lawn &amp; Garden</div>
+        <div class="logo-sub">Operations Hub · Yakima, WA</div>
+      </div>
+    </div>
+    <span class="demo-pill">Mockup · sample data only</span>
+    <button class="reset-btn" data-action="reset">Reset demo</button>
+  </div>
+  <nav class="roles"><div class="roles-inner" id="roleTabs"></div></nav>
+</header>
+
+<main id="view"></main>
+
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   Colonial Lawn & Garden: operations hub mockup
+   Everything is sample data, stored in this browser only.
+   ========================================================= */
+
+const STORE_KEY = 'clg-ops-demo-v1';
+const DAY = 86400000;
+
+/* ---------- date helpers ---------- */
+function startOfDay(d){ const x = new Date(d); x.setHours(0,0,0,0); return x; }
+const TODAY = startOfDay(new Date());
+function localKey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function dayKey(offset){ const d = new Date(TODAY); d.setDate(d.getDate()+offset); return localKey(d); }
+function weekMonday(){ const d = new Date(TODAY); const wd = (d.getDay()+6)%7; d.setDate(d.getDate()-wd); return d; }
+function fmtDay(key){ const d = new Date(key+'T12:00:00'); return d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}); }
+function fmtTime(ms){ return new Date(ms).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}); }
+function fmtDateTime(ms){ return new Date(ms).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }
+function fmtDur(ms){ const s = Math.max(0,Math.floor(ms/1000)); const h=Math.floor(s/3600), m=Math.floor(s%3600/60), sec=s%60; return (h?h+':':'')+String(m).padStart(h?2:1,'0')+':'+String(sec).padStart(2,'0'); }
+function fmtHM(ms){ const m = Math.round(ms/60000); return Math.floor(m/60)+'h '+(m%60)+'m'; }
+function fmt12(hhmm){ const [h,m]=hhmm.split(':').map(Number); const ap=h>=12?'PM':'AM'; return ((h+11)%12+1)+':'+String(m).padStart(2,'0')+' '+ap; }
+function money(n){ return '$'+n.toLocaleString(undefined,{minimumFractionDigits:0}); }
+function esc(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function initials(n){ return n.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
+
+/* ---------- seed data ---------- */
+function seed(){
+  const now = Date.now();
+  // Today's times anchored to the clock on the wall; falls back to "X ago" if that time hasn't happened yet.
+  const at = (hhmm, ago) => { const [h,m]=hhmm.split(':').map(Number); const d=new Date(TODAY); d.setHours(h,m,0,0); return d.getTime() < now-5*60e3 ? d.getTime() : now-ago; };
+  const yest = hhmm => at(hhmm,0) - DAY;
+  const techs = [
+    {id:'T1', name:'Luis Ramirez',   crew:'Crew A · Maintenance', truck:'Truck 3'},
+    {id:'T2', name:'Jake Morrison',  crew:'Crew A · Maintenance', truck:'Truck 3'},
+    {id:'T3', name:'Ana Villanueva', crew:'Crew B · Irrigation',  truck:'Truck 5'},
+    {id:'T4', name:'Tyler Brooks',   crew:'Crew C · Install',     truck:'Truck 1'},
+  ];
+  const clients = {
+    C1:{name:'Harper Residence', contact:'Diane Harper', phone:'(509) 555-0142', address:'4021 Englewood Ave, Yakima', notes:'Side gate code 1987. Friendly golden retriever, keep gate latched.', plan:'Weekly maintenance (Apr–Oct)'},
+    C2:{name:'Summitview Dental', contact:'Office Manager: Kelly Tran', phone:'(509) 555-0188', address:'5200 Summitview Ave, Yakima', notes:'Commercial. Blow parking lot before 7:30 AM opening if possible.', plan:'Commercial maintenance contract'},
+    C3:{name:'Ochoa Residence', contact:'Roberto Ochoa', phone:'(509) 555-0119', address:'1308 S 38th Ave, Yakima', notes:'Valve box is behind the shed. Customer wants a call when finished.', plan:'Irrigation service'},
+    C4:{name:'Westbrook HOA', contact:'Board: Pam Liddell', phone:'(509) 555-0160', address:'Westbrook Loop common areas, Yakima', notes:'14 zones across 3 controllers. Map in the truck binder.', plan:'HOA grounds contract'},
+    C5:{name:'Nguyen Residence', contact:'Tom & Lisa Nguyen', phone:'(509) 555-0133', address:'812 N 52nd Ave, Yakima', notes:'New install. Paver patio plus drip line to raised beds.', plan:'Design / install project'},
+    C6:{name:'Fischer Residence', contact:'Margaret Fischer', phone:'(509) 555-0171', address:'3115 Tieton Dr, Yakima', notes:'Elderly customer, knock loudly. Pays by check, leave invoice in the door.', plan:'Seasonal cleanups'},
+    C7:{name:'Valley Christian Church', contact:'Facilities: Dan Kerr', phone:'(509) 555-0195', address:'7700 W Nob Hill Blvd, Yakima', notes:'Avoid Wednesday evenings (youth group parking).', plan:'Commercial maintenance contract'},
+    C8:{name:'Castillo Residence', contact:'Elena Castillo', phone:'(509) 555-0127', address:'602 Conestoga Blvd, Yakima', notes:'Asked for estimate on spring overseed.', plan:'Weekly maintenance (Apr–Oct)'},
+  };
+  const S = (name,price,tasks)=>({name,price,tasks});
+  let jid = 1000;
+  const J = (off,start,est,techId,clientId,services,extra={})=>({id:'J'+(++jid), date:dayKey(off), start, est, techId, clientId, services, status:'scheduled', clockIn:null, clockOut:null, done:[], ...extra});
+  const jobs = [
+    // today
+    J(0,'08:00',60,'T1','C2',[S('Leaf cleanup, parking lot + beds',185,['Blow lot and walkways','Clear leaves from beds','Haul debris']),S('Final mow of season',65,['Mow and edge','Bag clippings'])],{status:'done',clockIn:Math.min(at('08:04',4.2*3600e3), at('09:10',3.1*3600e3)-65*60e3),clockOut:at('09:10',3.1*3600e3),done:['0-0','0-1','0-2','1-0','1-1']}),
+    J(0,'09:30',90,'T1','C1',[S('Fall leaf cleanup',240,['Rake/blow front and back lawn','Clear beds and under shrubs','Haul debris (2 loads max)']),S('Core aeration',95,['Flag sprinkler heads','Aerate front and back lawn'])]),
+    J(0,'13:00',60,'T1','C6',[S('Shrub pruning, front beds',150,['Prune boxwoods','Shape lilacs (light, no hard cut)','Clean up clippings'])]),
+    J(0,'08:30',75,'T2','C7',[S('Leaf cleanup, grounds',320,['Blow lawn areas','Clear north side beds','Haul debris'])],{status:'in_progress',clockIn:at('08:34',47*60e3),done:['0-0']}),
+    J(0,'11:00',60,'T2','C8',[S('Weekly mow & edge',55,['Mow front and back','Edge walks and driveway','Blow off hard surfaces'])]),
+    J(0,'08:00',45,'T3','C3',[S('Sprinkler winterization (blowout)',85,['Shut off backflow','Blow out all zones','Leave controller in OFF'])],{status:'done',clockIn:Math.min(at('07:58',4.5*3600e3), at('08:41',3.8*3600e3)-43*60e3),clockOut:at('08:41',3.8*3600e3),done:['0-0','0-1','0-2']}),
+    J(0,'09:30',180,'T3','C4',[S('Sprinkler winterization, 14 zones',620,['Controller 1 zones 1–5','Controller 2 zones 6–10','Controller 3 zones 11–14','Insulate backflow assemblies'])],{status:'in_progress',clockIn:at('09:36',2.4*3600e3),done:['0-0','0-1']}),
+    J(0,'07:30',480,'T4','C5',[S('Paver patio install, day 2',0,['Compact base','Lay pavers','Cut borders']),S('Drip line to raised beds',0,['Run mainline','Install emitters','Test'])],{status:'in_progress',clockIn:at('07:31',5.3*3600e3),done:['0-0']}),
+    // rest of week
+    J(1,'08:00',60,'T1','C8',[S('Fall leaf cleanup',210,['Blow lawn and beds','Haul debris'])]),
+    J(1,'10:00',90,'T2','C1',[S('Gutter clean-out',120,['Clean gutters','Flush downspouts'])]),
+    J(1,'08:30',120,'T3','C7',[S('Sprinkler winterization',260,['Blow out all zones','Insulate backflow'])]),
+    J(1,'07:30',480,'T4','C5',[S('Paver patio install, day 3',0,['Polymeric sand','Final compact','Site cleanup'])]),
+    J(2,'08:00',120,'T1','C4',[S('HOA leaf cleanup, phase 1',540,['Common area A','Common area B'])]),
+    J(2,'09:00',60,'T3','C6',[S('Sprinkler winterization',85,['Blow out all zones'])]),
+    J(-1,'08:00',90,'T1','C7',[S('Leaf cleanup',320,['Blow lawn','Haul debris'])],{status:'done'}),
+    J(-1,'09:00',60,'T3','C1',[S('Sprinkler winterization',85,['Blow out all zones'])],{status:'done'}),
+    J(-2,'08:00',240,'T4','C5',[S('Paver patio install, day 1',0,['Excavate','Set base'])],{status:'done'}),
+    J(3,'08:00',60,'T2','C2',[S('Weekly commercial maintenance',140,['Mow','Blow lot'])]),
+    J(3,'10:00',90,'T4','C8',[S('Spring overseed estimate walk',0,['Measure lawn','Photos for quote'])]),
+  ];
+  const equipment = [
+    {id:'M-07', name:'Toro Z-Master 60" zero-turn', type:'Mower', status:'Down'},
+    {id:'M-04', name:'Exmark Lazer Z 52"', type:'Mower', status:'OK'},
+    {id:'B-12', name:'Stihl BR 800 backpack blower', type:'Blower', status:'Needs service'},
+    {id:'T-03', name:'Echo SRM-2620 trimmer', type:'Trimmer', status:'OK'},
+    {id:'A-01', name:'Ryan Lawnaire 28 aerator', type:'Aerator', status:'OK'},
+    {id:'C-02', name:'Towable air compressor 185 CFM', type:'Compressor', status:'OK'},
+    {id:'TR-5', name:'Truck 5 · 2018 F-250', type:'Vehicle', status:'Needs service'},
+  ];
+  const tickets = [
+    {id:'EQ-118', equipId:'M-07', title:'Deck belt shredded mid-job', desc:'Belt came off and shredded on the Summitview job. Mower is loaded on Truck 3 and not usable.', priority:'High', status:'In Progress', reportedBy:'T1', created:yest('10:15'), log:[{t:yest('11:40'),by:'Shop',msg:'Pulled deck. Idler pulley bearing is also rough, replacing both.'}]},
+    {id:'EQ-117', equipId:'B-12', title:'Hard starting, bogs at full throttle', desc:'Takes 10+ pulls to start. Loses power when held wide open.', priority:'Medium', status:'Waiting on Parts', reportedBy:'T2', created:yest('13:20')-2*DAY, log:[{t:yest('08:05')-DAY,by:'Shop',msg:'Carb kit and air filter ordered from dealer. ETA Friday.'}]},
+    {id:'EQ-116', equipId:'TR-5', title:'Check engine light on', desc:'Light came on yesterday on the way back from Selah. Truck drives fine.', priority:'Medium', status:'New', reportedBy:'T3', created:at('07:05',5*3600e3), log:[]},
+    {id:'EQ-112', equipId:'A-01', title:'Tines worn down', desc:'Plugs are coming out short. Probably time for new tines before the fall aeration rush.', priority:'Low', status:'Resolved', reportedBy:'T1', created:yest('15:30')-8*DAY, log:[{t:yest('10:10')-7*DAY,by:'Shop',msg:'Replaced full tine set. Ready to go.'}]},
+  ];
+  const receptionists = [
+    {id:'REC-01', name:'Maria Delgado'},
+    {id:'REC-02', name:'Brenda Hale'},
+    {id:'REC-03', name:'Sam Ortiz'},
+  ];
+  const calls = [
+    {id:'CL-2041', type:'call', dir:'Inbound', recId:'REC-01', from:'(509) 555-0127', caller:'Elena Castillo', clientId:'C8', ts:at('09:48',1.5*3600e3), dur:212, tags:['New service','Estimate'], summary:'Existing weekly customer wants fall leaf cleanup added and an estimate for spring overseeding. Booked cleanup for tomorrow 8 AM with Luis. Estimate walk Thursday.', transcript:[
+      ['rec','Thank you for calling Colonial Lawn and Garden, this call may be recorded. This is Maria, how can I help you?'],
+      ['caller','Hi Maria, this is Elena Castillo over on Conestoga. You guys mow for us every week.'],
+      ['rec','Hi Elena, yes, I have you right here. What can I do for you?'],
+      ['caller','The leaves are really coming down now. Can we add a fall cleanup before the weekly service ends?'],
+      ['rec','Absolutely. I have an opening tomorrow at 8 AM with Luis. Fall cleanup for your lot size is $210, and that includes hauling the debris.'],
+      ['caller','Perfect, let\'s do it. And while I have you, the back lawn got really thin this summer. Can someone look at overseeding in the spring?'],
+      ['rec','Sure. I\'ll put you down for an estimate walk on Thursday at 10. Tyler will measure and take photos, and we\'ll email you a quote.'],
+      ['caller','Great, thank you so much.'],
+      ['rec','You\'re welcome, Elena. You\'ll get a text reminder the night before. Have a great day.'],
+    ]},
+    {id:'VM-0388', type:'voicemail', dir:'Inbound', recId:'REC-02', from:'(509) 555-0104', caller:'Unknown caller', clientId:null, ts:at('07:12',3*3600e3), dur:41, tags:['New lead','Sprinkler blowout'], summary:'New caller (Gary, West Valley) needs sprinkler blowout before the hard freeze. Wants a callback today.', transcript:[
+      ['caller','Hi, yeah, my name is Gary, I\'m out in West Valley off of Zier Road. I need to get my sprinklers blown out before it freezes. I\'ve got maybe eight zones. Could somebody call me back today? Number is 509-555-0104. Thanks.'],
+    ], followUp:false},
+    {id:'CL-2040', type:'call', dir:'Inbound', recId:'REC-02', from:'(509) 555-0160', caller:'Pam Liddell', clientId:'C4', ts:at('08:21',4*3600e3), dur:148, tags:['Existing client','Schedule check'], summary:'HOA board member confirmed today\'s winterization and asked that the crew avoid the playground area until 10 AM for a school pickup. Note passed to Ana.', transcript:[
+      ['rec','Colonial Lawn and Garden, this call may be recorded. This is Brenda.'],
+      ['caller','Hi Brenda, Pam Liddell with Westbrook HOA. Just confirming you\'re winterizing our system today?'],
+      ['rec','Yes, Ana is scheduled to arrive at 9:30. It\'s about a three hour job for all fourteen zones.'],
+      ['caller','Great. One thing: there\'s a school pickup at the playground until about 10. Can she start on the far side?'],
+      ['rec','No problem, I\'ll message her right now so she starts with controller three.'],
+      ['caller','Wonderful, thanks.'],
+    ]},
+    {id:'VM-0387', type:'voicemail', dir:'Inbound', recId:'REC-01', from:'(509) 555-0171', caller:'Margaret Fischer', clientId:'C6', ts:yest('16:52'), dur:36, tags:['Existing client','Reschedule'], summary:'Customer asks if pruning can happen in the afternoon instead of the morning. Already scheduled at 1 PM, so no change needed. Callback to confirm.', transcript:[
+      ['caller','Hello, this is Margaret Fischer on Tieton. I wanted to ask if the pruning could be done in the afternoon, I have a doctor appointment in the morning. Please call me back. Thank you, dear.'],
+    ], followUp:true},
+    {id:'CL-2038', type:'call', dir:'Outbound', recId:'REC-03', from:'(509) 555-0133', caller:'Tom Nguyen', clientId:'C5', ts:yest('14:15'), dur:305, tags:['Project update','Install'], summary:'Updated customer on patio install timeline (day 2 tomorrow). Customer approved adding a second drip zone for +$180. Change order sent to manager.', transcript:[
+      ['rec','Hi Tom, this is Sam from Colonial Lawn and Garden. This call may be recorded. I\'m calling with an update on your patio.'],
+      ['caller','Hey Sam. How\'s it looking?'],
+      ['rec','Base is excavated and set. Tyler is back tomorrow to lay the pavers, and we expect to finish Friday.'],
+      ['caller','Nice. Hey, my wife was asking: could the drip line also go to the planters by the fence?'],
+      ['rec','Yes. That would be a second drip zone, which adds $180. Want me to send a change order over for you to approve?'],
+      ['caller','Yeah, go ahead and send it.'],
+    ]},
+    {id:'CL-2036', type:'call', dir:'Inbound', recId:'REC-03', from:'(509) 555-0199', caller:'Rick Alvarez', clientId:null, ts:yest('10:37'), dur:96, tags:['New lead','Snow removal'], summary:'Owner of a small office building on 16th Ave asked about winter snow removal contracts. Sent the snow contract info sheet by email.', transcript:[
+      ['rec','Colonial Lawn and Garden, this call may be recorded. This is Sam.'],
+      ['caller','Hi, do you guys do snow plowing for businesses?'],
+      ['rec','We do. We offer seasonal snow removal contracts for commercial lots. Can I get your email and I\'ll send the details over?'],
+      ['caller','Sure, it\'s rick at alvarez properties dot com.'],
+    ]},
+  ];
+  const paperwork = [
+    ['i9','Form I-9 (employment eligibility) + ID verification'],
+    ['w4','Federal Form W-4'],
+    ['dd','Direct deposit authorization'],
+    ['ec','Emergency contact form'],
+    ['hb','Employee handbook acknowledgment'],
+    ['dl','Driver\'s license copy + driving record check'],
+    ['dt','Drug & alcohol policy acknowledgment'],
+    ['uni','Uniform & PPE issued (boots, eye/ear protection)'],
+  ];
+  const trainings = [
+    ['saf','General safety orientation'],
+    ['heat','Outdoor heat exposure & wildfire smoke awareness'],
+    ['mow','Zero-turn mower operation & sign-off'],
+    ['hand','Trimmer / blower / edger handling'],
+    ['trl','Truck & trailer hookup, load securement'],
+    ['irr','Irrigation basics & winterization'],
+    ['chem','Chemical handling (WSDA license if applying)'],
+    ['cs','Customer service & on-site etiquette'],
+    ['app','Using the Ops Hub app (clock-in, jobs, tickets)'],
+  ];
+  const mk = (keys,doneCount)=>Object.fromEntries(keys.map(([k],i)=>[k,i<doneCount]));
+  const employees = [
+    {id:'E21', name:'Marco Sandoval', role:'Landscape Technician', start:dayKey(-3), manager:'Crew A lead', paper:mk(paperwork,8), train:mk(trainings,5)},
+    {id:'E22', name:'Jenna Wu', role:'Receptionist', start:dayKey(-1), manager:'Office manager', paper:mk(paperwork,5), train:Object.fromEntries(trainings.map(([k])=>[k,['saf','cs','app'].includes(k)?false:null]))},
+    {id:'E23', name:'Derek Pollard', role:'Small Engine Mechanic', start:dayKey(4), manager:'Shop lead', paper:mk(paperwork,2), train:mk(trainings,0)},
+    {id:'E19', name:'Sofia Reyes', role:'Irrigation Technician', start:dayKey(-21), manager:'Crew B lead', paper:mk(paperwork,8), train:mk(trainings,9)},
+  ];
+  // Jenna: receptionist only needs a subset of trainings
+  employees[1].train = {saf:true,cs:false,app:true};
+  return {techs,clients,jobs,equipment,tickets,receptionists,calls,paperwork,trainings,employees,
+    ui:{role:'tech', techId:'T1', techJob:null, techTab:'today', recId:'ALL', callSel:'CL-2041', callFilter:'all', search:'', hrSel:'E21', mechFilter:'open', mgrDay:dayKey(0)},
+    nextTicket:119, nextEmp:24};
+}
+
+let state;
+try { state = JSON.parse(localStorage.getItem(STORE_KEY)); } catch(e){ state = null; }
+if(!state || !state.jobs) state = seed();
+function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
+
+/* ---------- lookups ---------- */
+const tech = id => state.techs.find(t=>t.id===id);
+const client = id => state.clients[id];
+const job = id => state.jobs.find(j=>j.id===id);
+const equip = id => state.equipment.find(e=>e.id===id);
+const recp = id => state.receptionists.find(r=>r.id===id);
+const jobTotal = j => j.services.reduce((a,s)=>a+s.price,0);
+const taskCount = j => j.services.reduce((a,s)=>a+s.tasks.length,0);
+const elapsed = j => j.clockIn ? ((j.clockOut||Date.now()) - j.clockIn) : 0;
+const statusBadge = s => ({scheduled:'<span class="badge b-blue">Scheduled</span>', in_progress:'<span class="badge b-green"><span class="dot pulse"></span>On site</span>', done:'<span class="badge b-gray">Complete</span>'}[s]);
+const prioBadge = p => `<span class="badge ${p==='High'?'b-red':p==='Medium'?'b-amber':'b-gray'}">${p}</span>`;
+const eqBadge = s => `<span class="badge ${s==='Down'?'b-red':s==='OK'?'b-green':'b-amber'}">${s}</span>`;
+
+/* ---------- toast & modal ---------- */
+let toastT;
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2600); }
+function openModal(html){ document.getElementById('modal').innerHTML=html; document.getElementById('modalBg').classList.add('open'); }
+function closeModal(){ document.getElementById('modalBg').classList.remove('open'); }
+document.getElementById('modalBg').addEventListener('click',e=>{ if(e.target.id==='modalBg') closeModal(); });
+
+/* ---------- role tabs ---------- */
+const ROLES = [
+  ['tech','Technician'],
+  ['mgr','Manager'],
+  ['mech','Shop / Mechanics'],
+  ['rec','Reception'],
+  ['hr','HR & Onboarding'],
+];
+function renderTabs(){
+  const openT = state.tickets.filter(t=>t.status!=='Resolved').length;
+  const vmOpen = state.calls.filter(c=>c.type==='voicemail' && !c.handled).length;
+  const counts = {mech:openT, rec:vmOpen};
+  document.getElementById('roleTabs').innerHTML = ROLES.map(([k,l])=>
+    `<button class="role-tab ${state.ui.role===k?'active':''}" data-action="role" data-role="${k}">${l}${counts[k]?`<span class="ct">${counts[k]}</span>`:''}</button>`).join('');
+}
+
+function render(){
+  renderTabs();
+  const v = document.getElementById('view');
+  v.innerHTML = ({tech:viewTech, mgr:viewMgr, mech:viewMech, rec:viewRec, hr:viewHR}[state.ui.role])();
+  save();
+}
+
+/* =========================================================
+   TECHNICIAN
+   ========================================================= */
+function viewTech(){
+  const t = tech(state.ui.techId);
+  const sel = `<select data-action="techPick" style="width:auto">${state.techs.map(x=>`<option value="${x.id}" ${x.id===t.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
+  return `
+  <div class="page-head">
+    <div><h2>Technician app</h2><p>What a crew member sees on their phone. Pick a tech to sign in as.</p></div>
+    <div class="row"><span class="small muted">Signed in as</span>${sel}</div>
+  </div>
+  <div class="tech-layout">
+    <div class="phone"><div class="phone-screen" id="phone">${phoneScreen(t)}</div></div>
+    <div class="card card-pad explain">
+      <h3>How it works in the field</h3>
+      <ol>
+        <li><b>Today's route</b> loads automatically: each job shows the client, address, gate codes and notes, and the exact services the client is paying for.</li>
+        <li><b>Clock in</b> when the truck pulls up. The manager's live board switches that job to <i>On site</i> with a running timer.</li>
+        <li><b>Check off tasks</b> as they're done. The checklist comes straight from what was sold, so nothing gets missed or done for free.</li>
+        <li><b>Clock out</b> when you leave. Actual time on site goes to the timesheet next to the estimate, so the office can see which jobs are priced right.</li>
+        <li><b>Equipment breaks?</b> Tap <i>Report equipment issue</i>. A ticket lands in the shop queue instantly with who, what and where.</li>
+      </ol>
+      <div class="note">Try it: open a scheduled job, clock in, then switch to the <b>Manager</b> tab to see it go live. Report an equipment issue, then check <b>Shop / Mechanics</b>.</div>
+    </div>
+  </div>`;
+}
+
+function phoneScreen(t){
+  const ui = state.ui;
+  if(ui.techJob && job(ui.techJob)) return phoneJob(t, job(ui.techJob));
+  const today = state.jobs.filter(j=>j.techId===t.id && j.date===dayKey(0)).sort((a,b)=>a.start.localeCompare(b.start));
+  const active = today.find(j=>j.status==='in_progress');
+  let body = '';
+  if(ui.techTab==='today'){
+    body = `
+      ${active?`<div class="note" style="margin-bottom:12px"><b>On the clock</b> at ${esc(client(active.clientId).name)} · <span data-live="${active.id}">${fmtDur(elapsed(active))}</span></div>`:''}
+      <div class="row between" style="margin-bottom:8px"><b>Today's jobs</b><span class="small muted">${today.filter(j=>j.status==='done').length}/${today.length} done</span></div>
+      ${today.length?today.map(j=>{ const c=client(j.clientId); return `
+        <div class="job-card ${j.status==='in_progress'?'active':''}" data-action="openJob" data-id="${j.id}">
+          <div class="row between"><span class="small muted">${fmt12(j.start)} · est. ${j.est} min</span>${statusBadge(j.status)}</div>
+          <div class="t" style="margin-top:4px">${esc(c.name)}</div>
+          <div class="small muted">${esc(c.address)}</div>
+          <div class="small" style="margin-top:6px">${j.services.map(s=>esc(s.name)).join(' · ')}</div>
+        </div>`}).join(''):'<div class="empty">No jobs today.</div>'}`;
+  } else if(ui.techTab==='time'){
+    const done = state.jobs.filter(j=>j.techId===t.id && j.clockIn);
+    const total = done.reduce((a,j)=>a+elapsed(j),0);
+    body = `<b>My timesheet · today</b>
+      <div class="card card-pad" style="margin:10px 0;text-align:center"><div class="kpi"><div class="n">${fmtHM(total)}</div><div class="l">on site today</div></div></div>
+      ${done.length?done.map(j=>`<div class="svc"><span>${esc(client(j.clientId).name)}<br><span class="small muted">${fmtTime(j.clockIn)} – ${j.clockOut?fmtTime(j.clockOut):'now'}</span></span><b>${fmtHM(elapsed(j))}</b></div>`).join(''):'<div class="empty">No clock-ins yet today.</div>'}`;
+  } else {
+    body = phoneReportForm(t, null);
+  }
+  return `
+    <div class="app-head"><div class="hi">${new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})}</div><div class="nm">Hi, ${esc(t.name.split(' ')[0])}</div><div class="small" style="opacity:.8">${esc(t.crew)} · ${esc(t.truck)}</div></div>
+    <div class="app-body">${body}</div>
+    <div class="app-tabs">
+      <button class="${ui.techTab==='today'?'on':''}" data-action="techTab" data-tab="today"><span class="ic">📋</span>Jobs</button>
+      <button class="${ui.techTab==='time'?'on':''}" data-action="techTab" data-tab="time"><span class="ic">⏱</span>Timesheet</button>
+      <button class="${ui.techTab==='report'?'on':''}" data-action="techTab" data-tab="report"><span class="ic">🔧</span>Report issue</button>
+    </div>`;
+}
+
+function phoneReportForm(t, jobId){
+  return `<b>Report equipment issue</b>
+    <p class="small muted" style="margin:4px 0 12px">Goes straight to the shop's ticket queue.</p>
+    <div class="stack">
+      <div><label class="f">Equipment</label><select id="rEquip">${state.equipment.map(e=>`<option value="${e.id}">${e.id} · ${esc(e.name)}</option>`).join('')}</select></div>
+      <div><label class="f">What's wrong?</label><input type="text" id="rTitle" placeholder="e.g. Won't start, blade vibrating"></div>
+      <div><label class="f">Details</label><textarea id="rDesc" placeholder="What happened, where the equipment is now"></textarea></div>
+      <div><label class="f">Can you keep working?</label><select id="rPrio"><option value="High">No, it's down</option><option value="Medium" selected>Yes, but it needs a look soon</option><option value="Low">Yes, minor issue</option></select></div>
+      <button class="btn btn-primary btn-big" data-action="submitReport" data-job="${jobId||''}">Send to shop</button>
+    </div>`;
+}
+
+function phoneJob(t, j){
+  const c = client(j.clientId);
+  const taskTotal = taskCount(j);
+  const pct = Math.round(j.done.length/taskTotal*100);
+  let clockBlock;
+  if(j.status==='scheduled') clockBlock = `<button class="btn btn-primary btn-big" data-action="clockIn" data-id="${j.id}">Clock in · arrived on site</button>`;
+  else if(j.status==='in_progress') clockBlock = `<div class="card card-pad" style="text-align:center;margin-bottom:10px"><div class="small muted">On site since ${fmtTime(j.clockIn)}</div><div class="timer" data-live="${j.id}">${fmtDur(elapsed(j))}</div><div class="small muted">Estimate: ${j.est} min</div></div>
+      <button class="btn btn-danger btn-big" data-action="clockOut" data-id="${j.id}">Clock out · leaving site</button>`;
+  else clockBlock = `<div class="card card-pad" style="text-align:center"><span class="badge b-gray">Complete</span><div class="small muted" style="margin-top:6px">${j.clockIn?`${fmtTime(j.clockIn)} – ${fmtTime(j.clockOut)} · ${fmtHM(elapsed(j))} on site (est. ${j.est} min)`:'Completed'}</div></div>`;
+  return `
+    <div class="app-head"><button class="back" data-action="closeJob">← Today's jobs</button><div class="nm">${esc(c.name)}</div><div class="small" style="opacity:.85">${fmt12(j.start)} · ${esc(c.plan)}</div></div>
+    <div class="app-body">
+      ${clockBlock}
+      <div class="card card-pad" style="margin-top:12px">
+        <h3>Client</h3>
+        <dl class="kv"><dt>Contact</dt><dd>${esc(c.contact)}</dd><dt>Phone</dt><dd>${esc(c.phone)}</dd><dt>Address</dt><dd>${esc(c.address)}</dd></dl>
+        <div class="note" style="margin-top:10px">📝 ${esc(c.notes)}</div>
+      </div>
+      <div class="card card-pad" style="margin-top:12px">
+        <div class="row between"><h3 style="margin:0">Work ordered</h3><span class="small muted">${j.done.length}/${taskTotal} tasks</span></div>
+        <div class="progress" style="margin:8px 0 4px"><i style="width:${pct}%"></i></div>
+        ${j.services.map((s,si)=>`
+          <div style="margin-top:12px"><div class="row between"><b>${esc(s.name)}</b><span class="small muted">${s.price?money(s.price):'Project'}</span></div>
+          ${s.tasks.map((tk,ti)=>{ const k=si+'-'+ti; const d=j.done.includes(k); return `<div class="check ${d?'done':''}" data-action="toggleTask" data-id="${j.id}" data-k="${k}"><span class="box"></span><span class="lbl">${esc(tk)}</span></div>`}).join('')}
+          </div>`).join('')}
+      </div>
+      <button class="btn btn-big" style="margin-top:12px" data-action="techTab" data-tab="report">🔧 Report equipment issue</button>
+    </div>`;
+}
+
+/* =========================================================
+   MANAGER
+   ========================================================= */
+function viewMgr(){
+  const today = state.jobs.filter(j=>j.date===dayKey(0));
+  const live = today.filter(j=>j.status==='in_progress');
+  const done = today.filter(j=>j.status==='done');
+  const hours = today.reduce((a,j)=>a+elapsed(j),0);
+  const openT = state.tickets.filter(t=>t.status!=='Resolved');
+  const revenue = done.reduce((a,j)=>a+jobTotal(j),0);
+  const mon = weekMonday();
+  const days = Array.from({length:6},(_,i)=>{ const d=new Date(mon); d.setDate(d.getDate()+i); return localKey(d); });
+  return `
+  <div class="page-head"><div><h2>Manager dashboard</h2><p>Live view of every crew, today's progress and the week's schedule.</p></div>
+    <button class="btn btn-primary" data-action="newJob">+ Schedule a job</button></div>
+  <div class="grid g-4" style="margin-bottom:16px">
+    <div class="card card-pad kpi"><div class="n">${live.length}</div><div class="l">Crews on site now</div></div>
+    <div class="card card-pad kpi"><div class="n">${done.length}<span class="muted" style="font-size:16px"> / ${today.length}</span></div><div class="l">Jobs complete today</div></div>
+    <div class="card card-pad kpi"><div class="n" data-live-total>${fmtHM(hours)}</div><div class="l">Billable hours logged today</div></div>
+    <div class="card card-pad kpi"><div class="n">${openT.length}</div><div class="l">Open equipment tickets${openT.some(t=>t.priority==='High')?' · <span style="color:var(--red)">1+ down</span>':''}</div></div>
+  </div>
+  <div class="grid g-side" style="margin-bottom:16px">
+    <div class="card card-pad">
+      <div class="row between"><h3>In progress right now</h3><span class="small muted">Updates as techs clock in/out</span></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Technician</th><th>Job</th><th>On site</th><th>Tasks</th></tr></thead>
+        <tbody>${state.techs.map(t=>{
+          const cur = today.find(j=>j.techId===t.id && j.status==='in_progress');
+          const next = today.filter(j=>j.techId===t.id && j.status==='scheduled').sort((a,b)=>a.start.localeCompare(b.start))[0];
+          if(!cur) return `<tr><td><b>${esc(t.name)}</b><div class="small muted">${esc(t.crew)}</div></td><td colspan="3"><span class="badge b-gray">Between jobs</span> ${next?`<span class="small muted">Next: ${esc(client(next.clientId).name)} at ${fmt12(next.start)}</span>`:'<span class="small muted">No more jobs today</span>'}</td></tr>`;
+          const over = elapsed(cur) > cur.est*60e3;
+          return `<tr class="click" data-action="jobModal" data-id="${cur.id}"><td><b>${esc(t.name)}</b><div class="small muted">${esc(t.crew)}</div></td>
+            <td>${esc(client(cur.clientId).name)}<div class="small muted">${esc(cur.services[0].name)}</div></td>
+            <td><span class="dot pulse"></span> <b data-live="${cur.id}">${fmtDur(elapsed(cur))}</b><div class="small ${over?'':'muted'}" style="${over?'color:var(--red)':''}">est. ${cur.est} min${over?' · over':''}</div></td>
+            <td style="min-width:90px"><div class="progress"><i style="width:${Math.round(cur.done.length/taskCount(cur)*100)}%"></i></div><div class="small muted">${cur.done.length}/${taskCount(cur)}</div></td></tr>`;
+        }).join('')}</tbody></table></div>
+    </div>
+    <div class="card card-pad">
+      <h3>Needs attention</h3>
+      <div class="stack">
+        ${openT.filter(t=>t.priority==='High').map(t=>`<div class="row" style="align-items:flex-start"><span class="badge b-red">Down</span><div class="small"><b>${esc(equip(t.equipId).name)}</b> (${t.id})<br><span class="muted">${esc(t.title)}</span></div></div>`).join('')}
+        ${state.calls.filter(c=>c.type==='voicemail'&&!c.handled).map(c=>`<div class="row" style="align-items:flex-start"><span class="badge b-amber">Voicemail</span><div class="small"><b>${esc(c.caller)}</b> · ${fmtDateTime(c.ts)}<br><span class="muted">${esc(c.summary)}</span></div></div>`).join('')}
+        ${today.filter(j=>j.status==='in_progress' && elapsed(j)>j.est*60e3).map(j=>`<div class="row" style="align-items:flex-start"><span class="badge b-red">Over estimate</span><div class="small"><b>${esc(client(j.clientId).name)}</b><br><span class="muted">${esc(tech(j.techId).name)} · est. ${j.est} min</span></div></div>`).join('')}
+        <div class="row" style="align-items:flex-start"><span class="badge b-green">Revenue</span><div class="small"><b>${money(revenue)}</b> in completed work today</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card card-pad">
+    <div class="row between wrap" style="margin-bottom:10px"><h3 style="margin:0">Week schedule</h3>
+      <div class="row small"><span class="badge b-blue">Scheduled</span><span class="badge b-green">On site</span><span class="badge b-gray">Complete</span></div></div>
+    <div class="table-wrap"><div class="sched">
+      <div class="hd">Technician</div>
+      ${days.map(d=>`<div class="hd ${d===dayKey(0)?'today':''}">${fmtDay(d)}</div>`).join('')}
+      ${state.techs.map(t=>`<div class="tn">${esc(t.name)}<div class="small muted" style="font-weight:400">${esc(t.crew.split(' · ')[1])}</div></div>`+
+        days.map(d=>`<div>${state.jobs.filter(j=>j.techId===t.id&&j.date===d).sort((a,b)=>a.start.localeCompare(b.start)).map(j=>`<button class="chip s-${j.status}" data-action="jobModal" data-id="${j.id}"><b>${fmt12(j.start)}</b> ${esc(client(j.clientId).name)}</button>`).join('')}</div>`).join('')).join('')}
+    </div></div>
+  </div>`;
+}
+
+function jobModalHTML(j){
+  const c = client(j.clientId), t = tech(j.techId);
+  return `<div class="modal-head"><div><h3>${esc(c.name)}</h3><div class="small muted">${fmtDay(j.date)} · ${fmt12(j.start)} · ${esc(t.name)}</div></div><button class="x" data-action="closeModal">×</button></div>
+  <div class="modal-body stack">
+    <div>${statusBadge(j.status)} ${j.clockIn?`<span class="small muted">Clocked in ${fmtTime(j.clockIn)}${j.clockOut?` · out ${fmtTime(j.clockOut)} · ${fmtHM(elapsed(j))}`:''} (est. ${j.est} min)</span>`:''}</div>
+    <dl class="kv"><dt>Contact</dt><dd>${esc(c.contact)} · ${esc(c.phone)}</dd><dt>Address</dt><dd>${esc(c.address)}</dd><dt>Plan</dt><dd>${esc(c.plan)}</dd><dt>Site notes</dt><dd>${esc(c.notes)}</dd></dl>
+    <div><b>Services</b>${j.services.map(s=>`<div class="svc"><span>${esc(s.name)}</span><b>${s.price?money(s.price):'Project'}</b></div>`).join('')}
+      <div class="svc"><b>Total</b><b>${jobTotal(j)?money(jobTotal(j)):'Per project contract'}</b></div></div>
+    <div><label class="f">Reassign technician</label><select data-action="reassign" data-id="${j.id}">${state.techs.map(x=>`<option value="${x.id}" ${x.id===j.techId?'selected':''}>${esc(x.name)}</option>`).join('')}</select></div>
+  </div>`;
+}
+
+function newJobModal(){
+  return `<div class="modal-head"><h3>Schedule a job</h3><button class="x" data-action="closeModal">×</button></div>
+  <div class="modal-body stack">
+    <div><label class="f">Client</label><select id="nClient">${Object.entries(state.clients).map(([id,c])=>`<option value="${id}">${esc(c.name)}</option>`).join('')}</select></div>
+    <div class="grid g-2"><div><label class="f">Date</label><input type="date" id="nDate" value="${dayKey(1)}"></div><div><label class="f">Start time</label><select id="nStart">${['07:30','08:00','09:00','10:00','11:00','13:00','14:00','15:00'].map(t=>`<option value="${t}">${fmt12(t)}</option>`).join('')}</select></div></div>
+    <div><label class="f">Technician</label><select id="nTech">${state.techs.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('')}</select></div>
+    <div><label class="f">Service</label><select id="nSvc">
+      <option value="Fall leaf cleanup|210|60">Fall leaf cleanup · $210</option>
+      <option value="Sprinkler winterization (blowout)|85|45">Sprinkler winterization · $85</option>
+      <option value="Core aeration|95|45">Core aeration · $95</option>
+      <option value="Weekly mow & edge|55|45">Weekly mow &amp; edge · $55</option>
+      <option value="Shrub pruning|150|60">Shrub pruning · $150</option>
+    </select></div>
+    <button class="btn btn-primary" data-action="createJob">Add to schedule</button>
+  </div>`;
+}
+
+/* =========================================================
+   MECHANICS / SHOP
+   ========================================================= */
+const TSTAT = ['New','In Progress','Waiting on Parts','Resolved'];
+function viewMech(){
+  return `
+  <div class="page-head"><div><h2>Shop · equipment tickets</h2><p>Every breakdown reported from the field or the office, tracked until it's fixed.</p></div>
+    <button class="btn btn-primary" data-action="newTicket">+ New ticket</button></div>
+  <div class="kanban" style="margin-bottom:16px">
+    ${TSTAT.map(s=>{ const list = state.tickets.filter(t=>t.status===s).sort((a,b)=>b.created-a.created); return `
+      <div class="col"><h4>${s}<span>${list.length}</span></h4>
+        ${list.map(t=>`<div class="tk" data-action="ticketModal" data-id="${t.id}">
+          <div class="row between"><span class="id">${t.id} · ${t.equipId}</span>${prioBadge(t.priority)}</div>
+          <div class="tt">${esc(t.title)}</div>
+          <div class="small muted">${esc(equip(t.equipId).name)}</div>
+          <div class="small muted" style="margin-top:4px">Reported by ${esc(reporterName(t.reportedBy))} · ${fmtDateTime(t.created)}</div>
+        </div>`).join('') || '<div class="small muted" style="padding:6px">Nothing here</div>'}
+      </div>`}).join('')}
+  </div>
+  <div class="card card-pad">
+    <h3>Equipment roster</h3>
+    <div class="table-wrap"><table><thead><tr><th>ID</th><th>Equipment</th><th>Type</th><th>Status</th><th>Open tickets</th></tr></thead>
+    <tbody>${state.equipment.map(e=>{ const n=state.tickets.filter(t=>t.equipId===e.id&&t.status!=='Resolved').length; return `<tr><td><b>${e.id}</b></td><td>${esc(e.name)}</td><td>${e.type}</td><td>${eqBadge(e.status)}</td><td>${n||'<span class="muted">—</span>'}</td></tr>`}).join('')}</tbody></table></div>
+  </div>`;
+}
+function reporterName(id){ return tech(id)?.name || id; }
+
+function ticketModalHTML(t){
+  const e = equip(t.equipId);
+  return `<div class="modal-head"><div><div class="small muted">${t.id}</div><h3>${esc(t.title)}</h3></div><button class="x" data-action="closeModal">×</button></div>
+  <div class="modal-body stack">
+    <div class="row wrap">${prioBadge(t.priority)} ${eqBadge(e.status)} <span class="small muted">${esc(e.id)} · ${esc(e.name)}</span></div>
+    <dl class="kv"><dt>Reported by</dt><dd>${esc(reporterName(t.reportedBy))}</dd><dt>When</dt><dd>${fmtDateTime(t.created)}</dd>${t.jobId&&job(t.jobId)?`<dt>On job</dt><dd>${esc(client(job(t.jobId).clientId).name)}</dd>`:''}<dt>Details</dt><dd>${esc(t.desc||'—')}</dd></dl>
+    <div><label class="f">Status</label><select data-action="ticketStatus" data-id="${t.id}">${TSTAT.map(s=>`<option ${s===t.status?'selected':''}>${s}</option>`).join('')}</select></div>
+    <div><b>Shop log</b>
+      ${t.log.length?t.log.map(l=>`<div class="svc"><span>${esc(l.msg)}</span><span class="small muted" style="white-space:nowrap;padding-left:10px">${fmtDateTime(l.t)}</span></div>`).join(''):'<div class="small muted" style="margin-top:4px">No notes yet.</div>'}
+    </div>
+    <div class="row"><input type="text" id="logMsg" placeholder="Add a repair note, part ordered, etc."><button class="btn btn-primary" data-action="addLog" data-id="${t.id}">Add</button></div>
+  </div>`;
+}
+function newTicketModal(){
+  return `<div class="modal-head"><h3>New equipment ticket</h3><button class="x" data-action="closeModal">×</button></div>
+  <div class="modal-body">${phoneReportForm({}, null).replace('<b>Report equipment issue</b>','').replace('Send to shop','Create ticket')}</div>`;
+}
+
+/* =========================================================
+   RECEPTION
+   ========================================================= */
+function viewRec(){
+  const ui = state.ui;
+  const q = ui.search.trim().toLowerCase();
+  let list = state.calls.filter(c=>(ui.recId==='ALL'||c.recId===ui.recId) && (ui.callFilter==='all'||c.type===ui.callFilter));
+  if(q) list = list.filter(c=>(c.caller+' '+c.summary+' '+c.transcript.map(l=>l[1]).join(' ')+' '+c.tags.join(' ')).toLowerCase().includes(q));
+  list.sort((a,b)=>b.ts-a.ts);
+  const sel = state.calls.find(c=>c.id===ui.callSel) || list[0];
+  const statFor = id => { const l=state.calls.filter(c=>id==='ALL'||c.recId===id); const n=l.filter(c=>c.type==='call').length; return `${n} call${n===1?'':'s'} · ${l.filter(c=>c.type==='voicemail').length} VM`; };
+  return `
+  <div class="page-head"><div><h2>Reception · calls &amp; voicemail</h2><p>Every call and voicemail recorded, transcribed and filed under the receptionist who handled it.</p></div></div>
+  <div class="row wrap" style="margin-bottom:12px">
+    <button class="rec-chip ${ui.recId==='ALL'?'on':''}" data-action="recPick" data-id="ALL"><span class="av" style="background:var(--brass)">ALL</span>All receptionists <span class="muted" style="font-weight:400">${statFor('ALL')}</span></button>
+    ${state.receptionists.map(r=>`<button class="rec-chip ${ui.recId===r.id?'on':''}" data-action="recPick" data-id="${r.id}"><span class="av">${initials(r.name)}</span>${esc(r.name)} <span class="muted" style="font-weight:400">${r.id} · ${statFor(r.id)}</span></button>`).join('')}
+  </div>
+  <div class="grid g-side">
+    <div class="card card-pad">
+      <div class="row wrap" style="margin-bottom:10px">
+        <input type="search" id="callSearch" placeholder="Search transcripts, names, tags…" value="${esc(ui.search)}" style="flex:1;min-width:180px">
+        <select data-action="callFilter" style="width:auto"><option value="all" ${ui.callFilter==='all'?'selected':''}>Calls + voicemail</option><option value="call" ${ui.callFilter==='call'?'selected':''}>Calls only</option><option value="voicemail" ${ui.callFilter==='voicemail'?'selected':''}>Voicemail only</option></select>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Type</th><th>Caller</th><th>Handled by</th><th>When</th><th>Length</th></tr></thead>
+        <tbody>${list.map(c=>`<tr class="click ${sel&&c.id===sel.id?'sel':''}" data-action="callPick" data-id="${c.id}">
+          <td>${c.type==='call'?`<span class="badge b-blue">📞 ${c.dir}</span>`:`<span class="badge ${c.handled?'b-gray':'b-amber'}">🎙 Voicemail</span>`}</td>
+          <td><b>${esc(c.caller)}</b><div class="small muted">${esc(c.from)}${c.clientId?'':' · <span style="color:var(--brass)">new</span>'}</div></td>
+          <td><span class="small">${esc(recp(c.recId).name)}</span><div class="small muted">${c.recId}</div></td>
+          <td class="small">${fmtDateTime(c.ts)}</td><td class="small">${fmtDur(c.dur*1000)}</td></tr>`).join('') || `<tr><td colspan="5" class="empty">No matches.</td></tr>`}</tbody></table></div>
+    </div>
+    <div class="card card-pad">${sel?callDetail(sel, q):'<div class="empty">Select a call.</div>'}</div>
+  </div>
+  <div class="note" style="margin-top:16px">Washington is an all-party consent state for recording phone calls (RCW 9.73.030). In the real system every call opens with an automated "this call may be recorded" announcement, shown at the top of each transcript here.</div>`;
+}
+
+function hl(text,q){ const t=esc(text); if(!q) return t; const i=t.toLowerCase().indexOf(esc(q)); return i<0?t:t.slice(0,i)+'<mark>'+t.slice(i,i+esc(q).length)+'</mark>'+t.slice(i+esc(q).length); }
+
+function callDetail(c,q){
+  const bars = Array.from({length:48},(_,i)=>`<i style="height:${20+Math.round(Math.abs(Math.sin(i*1.7+c.dur))*80)}%" class="${i<12?'p':''}"></i>`).join('');
+  const cl = c.clientId?client(c.clientId):null;
+  return `
+    <div class="row between" style="align-items:flex-start"><div><div class="small muted">${c.id} · ${c.type==='call'?c.dir+' call':'Voicemail'}</div><h3 style="margin:2px 0 0">${esc(c.caller)}</h3><div class="small muted">${esc(c.from)} · ${fmtDateTime(c.ts)}</div></div>
+      ${c.type==='voicemail'?(c.handled?'<span class="badge b-gray">Returned</span>':`<button class="btn btn-sm btn-primary" data-action="vmDone" data-id="${c.id}">Mark returned</button>`):''}</div>
+    <div class="player" style="margin:12px 0"><button class="play" data-action="noop" title="Audio playback (mockup)">▶</button><div class="wave">${bars}</div><span class="small muted">${fmtDur(c.dur*1000)}</span></div>
+    <div class="small"><b>Handled by</b> ${esc(recp(c.recId).name)} <span class="badge b-brass">${c.recId}</span></div>
+    <div class="row wrap" style="margin:8px 0">${c.tags.map(t=>`<span class="badge b-green">${esc(t)}</span>`).join('')} ${cl?`<span class="badge b-blue">Client: ${esc(cl.name)}</span>`:'<span class="badge b-amber">Not in client list</span>'}</div>
+    <div class="note" style="margin-bottom:12px"><b>AI summary:</b> ${esc(c.summary)}</div>
+    <b>Transcript</b>
+    <div class="transcript" style="margin-top:8px">${c.transcript.map(([w,txt])=>`<div class="line ${w==='rec'?'rec':''}"><span class="who">${w==='rec'?esc(recp(c.recId).name.split(' ')[0]):'Caller'}</span><span class="txt">${hl(txt,q)}</span></div>`).join('')}</div>`;
+}
+
+/* =========================================================
+   HR & ONBOARDING
+   ========================================================= */
+function empProgress(e){
+  const pk = Object.values(e.paper), tk = Object.values(e.train).filter(v=>v!==null);
+  const pd = pk.filter(Boolean).length, td = tk.filter(Boolean).length;
+  return {pd, pt:pk.length, td, tt:tk.length, pct: Math.round((pd+td)/(pk.length+tk.length)*100)};
+}
+function viewHR(){
+  const sel = state.employees.find(e=>e.id===state.ui.hrSel) || state.employees[0];
+  return `
+  <div class="page-head"><div><h2>HR · onboarding</h2><p>Every new hire's paperwork and training in one place, with progress tracked automatically.</p></div>
+    <button class="btn btn-primary" data-action="newHire">+ Add new hire</button></div>
+  <div class="grid g-side">
+    <div class="card card-pad">
+      <h3>New hires</h3>
+      <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Start</th><th>Paperwork</th><th>Training</th><th style="width:140px">Overall</th></tr></thead>
+      <tbody>${state.employees.map(e=>{ const p=empProgress(e); return `<tr class="click ${e.id===sel.id?'sel':''}" data-action="hrPick" data-id="${e.id}">
+        <td><div class="row"><span class="av">${initials(e.name)}</span><div><b>${esc(e.name)}</b><div class="small muted">${esc(e.role)}</div></div></div></td>
+        <td class="small">${fmtDay(e.start)}${e.start>dayKey(0)?'<div><span class="badge b-blue">Upcoming</span></div>':''}</td>
+        <td class="small">${p.pd}/${p.pt}</td><td class="small">${p.td}/${p.tt}</td>
+        <td><div class="progress"><i style="width:${p.pct}%;${p.pct===100?'':'background:var(--brass)'}"></i></div><div class="small muted">${p.pct===100?'Complete':p.pct+'%'}</div></td></tr>`}).join('')}</tbody></table></div>
+    </div>
+    <div class="card card-pad">${empDetail(sel)}</div>
+  </div>`;
+}
+function empDetail(e){
+  const p = empProgress(e);
+  const lists = (title,defs,obj,kind)=>`<div style="margin-top:14px"><div class="row between"><b>${title}</b><span class="small muted">${kind==='paper'?p.pd+'/'+p.pt:p.td+'/'+p.tt}</span></div>
+    ${defs.filter(([k])=>obj[k]!==undefined && obj[k]!==null).map(([k,l])=>`<div class="check ${obj[k]?'done':''}" data-action="hrToggle" data-id="${e.id}" data-kind="${kind}" data-k="${k}"><span class="box"></span><span class="lbl">${esc(l)}</span></div>`).join('')}</div>`;
+  return `
+    <div class="row"><span class="av" style="width:40px;height:40px;font-size:14px">${initials(e.name)}</span><div><h3 style="margin:0">${esc(e.name)}</h3><div class="small muted">${esc(e.role)} · reports to ${esc(e.manager)}</div></div></div>
+    <div style="margin-top:12px"><div class="row between small"><span>Start date ${fmtDay(e.start)}</span><b>${p.pct}% onboarded</b></div><div class="progress" style="margin-top:6px"><i style="width:${p.pct}%"></i></div></div>
+    ${lists('Paperwork',state.paperwork,e.paper,'paper')}
+    ${lists('Training',state.trainings,e.train,'train')}
+    <p class="small muted" style="margin-top:12px">Checklists are templated by role: a receptionist doesn't get mower sign-off, a mechanic gets shop safety. In the full build, each check-off also stores the signed document and who approved it.</p>`;
+}
+function newHireModal(){
+  return `<div class="modal-head"><h3>Add new hire</h3><button class="x" data-action="closeModal">×</button></div>
+  <div class="modal-body stack">
+    <div><label class="f">Full name</label><input type="text" id="hName" placeholder="First Last"></div>
+    <div><label class="f">Role</label><select id="hRole"><option>Landscape Technician</option><option>Irrigation Technician</option><option>Small Engine Mechanic</option><option>Receptionist</option></select></div>
+    <div><label class="f">Start date</label><input type="date" id="hStart" value="${dayKey(7)}"></div>
+    <button class="btn btn-primary" data-action="createHire">Start onboarding</button>
+  </div>`;
+}
+const ROLE_TRAININGS = {
+  'Landscape Technician':['saf','heat','mow','hand','trl','chem','cs','app'],
+  'Irrigation Technician':['saf','heat','hand','trl','irr','cs','app'],
+  'Small Engine Mechanic':['saf','mow','hand','trl','app'],
+  'Receptionist':['saf','cs','app'],
+};
+
+/* =========================================================
+   EVENTS
+   ========================================================= */
+document.addEventListener('click', e=>{
+  const el = e.target.closest('[data-action]');
+  if(!el || el.tagName==='SELECT') return;
+  const a = el.dataset.action, id = el.dataset.id, ui = state.ui;
+  switch(a){
+    case 'role': ui.role = el.dataset.role; break;
+    case 'reset': if(!confirm('Reset all demo data?')) return; state = seed(); closeModal(); toast('Demo data reset'); break;
+    case 'closeModal': closeModal(); return;
+    case 'noop': toast('Audio playback is mocked in this demo'); return;
+    // technician
+    case 'openJob': ui.techJob = id; break;
+    case 'closeJob': ui.techJob = null; ui.techTab='today'; break;
+    case 'techTab': ui.techTab = el.dataset.tab; if(el.dataset.tab!=='report') ui.techJob=null; else ui.reportFrom = ui.techJob; ui.techJob = null; break;
+    case 'clockIn': { const j=job(id); const other=state.jobs.find(x=>x.techId===j.techId&&x.status==='in_progress'); if(other){ toast('Clock out of '+client(other.clientId).name+' first'); return; } j.status='in_progress'; j.clockIn=Date.now(); toast('Clocked in at '+fmtTime(j.clockIn)); break; }
+    case 'clockOut': { const j=job(id); if(j.done.length<taskCount(j) && !confirm('Some tasks are not checked off. Clock out anyway?')) return; j.status='done'; j.clockOut=Date.now(); toast('Clocked out · '+fmtHM(elapsed(j))+' on site'); break; }
+    case 'toggleTask': { const j=job(id); const k=el.dataset.k; j.done = j.done.includes(k)? j.done.filter(x=>x!==k) : [...j.done,k]; break; }
+    case 'submitReport': {
+      const title=document.getElementById('rTitle').value.trim(); if(!title){ toast('Describe what\'s wrong'); return; }
+      const eqId=document.getElementById('rEquip').value, prio=document.getElementById('rPrio').value;
+      const fromTech = ui.role==='tech';
+      const t={id:'EQ-'+(state.nextTicket++), equipId:eqId, title, desc:document.getElementById('rDesc').value.trim(), priority:prio, status:'New', reportedBy: fromTech?ui.techId:'Office', created:Date.now(), log:[], jobId: fromTech?(ui.reportFrom||state.jobs.find(j=>j.techId===ui.techId&&j.status==='in_progress')?.id||null):null};
+      state.tickets.push(t);
+      if(prio==='High') equip(eqId).status='Down'; else if(equip(eqId).status==='OK') equip(eqId).status='Needs service';
+      closeModal(); ui.techTab='today'; ui.reportFrom=null; toast(t.id+' sent to the shop'); break; }
+    // manager
+    case 'jobModal': openModal(jobModalHTML(job(id))); return;
+    case 'newJob': openModal(newJobModal()); return;
+    case 'createJob': {
+      const [name,price,est]=document.getElementById('nSvc').value.split('|');
+      const j={id:'J'+Date.now(), date:document.getElementById('nDate').value||dayKey(1), start:document.getElementById('nStart').value, est:+est, techId:document.getElementById('nTech').value, clientId:document.getElementById('nClient').value, services:[{name,price:+price,tasks:['Complete '+name.toLowerCase(),'Clean up and haul debris']}], status:'scheduled', clockIn:null, clockOut:null, done:[]};
+      state.jobs.push(j); closeModal(); toast('Scheduled for '+tech(j.techId).name+' · '+fmtDay(j.date)); break; }
+    // mechanics
+    case 'ticketModal': openModal(ticketModalHTML(state.tickets.find(t=>t.id===id))); return;
+    case 'newTicket': openModal(newTicketModal()); return;
+    case 'addLog': { const t=state.tickets.find(x=>x.id===id); const m=document.getElementById('logMsg').value.trim(); if(!m) return; t.log.push({t:Date.now(),by:'Shop',msg:m}); save(); openModal(ticketModalHTML(t)); render(); return; }
+    // reception
+    case 'recPick': ui.recId = id; break;
+    case 'callPick': ui.callSel = id; break;
+    case 'vmDone': state.calls.find(c=>c.id===id).handled = true; toast('Voicemail marked as returned'); break;
+    // hr
+    case 'hrPick': ui.hrSel = id; break;
+    case 'hrToggle': { const emp=state.employees.find(x=>x.id===id); const o=el.dataset.kind==='paper'?emp.paper:emp.train; o[el.dataset.k]=!o[el.dataset.k]; if(empProgress(emp).pct===100) toast(emp.name+' is fully onboarded 🎉'); break; }
+    case 'newHire': openModal(newHireModal()); return;
+    case 'createHire': {
+      const name=document.getElementById('hName').value.trim(); if(!name){ toast('Enter a name'); return; }
+      const role=document.getElementById('hRole').value;
+      const emp={id:'E'+(state.nextEmp++), name, role, start:document.getElementById('hStart').value||dayKey(7), manager:role==='Receptionist'?'Office manager':role.includes('Mechanic')?'Shop lead':'Crew lead',
+        paper:Object.fromEntries(state.paperwork.map(([k])=>[k,false])), train:Object.fromEntries(ROLE_TRAININGS[role].map(k=>[k,false]))};
+      state.employees.push(emp); ui.hrSel=emp.id; closeModal(); toast('Onboarding started for '+name); break; }
+    default: return;
+  }
+  render();
+});
+
+document.addEventListener('change', e=>{
+  const el = e.target; const a = el.dataset.action; if(!a) return;
+  if(a==='techPick'){ state.ui.techId=el.value; state.ui.techJob=null; state.ui.techTab='today'; }
+  else if(a==='callFilter'){ state.ui.callFilter=el.value; }
+  else if(a==='reassign'){ const j=job(el.dataset.id); j.techId=el.value; toast('Reassigned to '+tech(el.value).name); closeModal(); }
+  else if(a==='ticketStatus'){ const t=state.tickets.find(x=>x.id===el.dataset.id); t.status=el.value; t.log.push({t:Date.now(),by:'Shop',msg:'Status → '+el.value});
+    if(el.value==='Resolved' && !state.tickets.some(x=>x.equipId===t.equipId&&x.status!=='Resolved')) equip(t.equipId).status='OK';
+    save(); openModal(ticketModalHTML(t)); }
+  else return;
+  render();
+});
+
+let searchT;
+document.addEventListener('input', e=>{
+  if(e.target.id!=='callSearch') return;
+  clearTimeout(searchT);
+  searchT = setTimeout(()=>{ state.ui.search=e.target.value; const pos=e.target.selectionStart; render(); const s=document.getElementById('callSearch'); s.focus(); s.setSelectionRange(pos,pos); }, 200);
+});
+
+/* live timers */
+setInterval(()=>{
+  document.querySelectorAll('[data-live]').forEach(el=>{ const j=job(el.dataset.live); if(j) el.textContent=fmtDur(elapsed(j)); });
+  const tot=document.querySelector('[data-live-total]');
+  if(tot) tot.textContent=fmtHM(state.jobs.filter(j=>j.date===dayKey(0)).reduce((a,j)=>a+elapsed(j),0));
+},1000);
+
+render();
+</script>
+</body>
+</html>
