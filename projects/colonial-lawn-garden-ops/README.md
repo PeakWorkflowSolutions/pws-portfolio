@@ -39,12 +39,45 @@ HR ──new hire──▶ Onboarding checklist from role template ──▶ e-s
 **Automation (fixed steps, no judgment):** clock in/out, schedule, ticket routing, checklists, progress math, filing calls under receptionist ID.
 **Agent layer (Claude judgment):** call/voicemail summaries, tagging (new lead vs. existing client, service type), matching callers to client records, flagging voicemails that need a callback today.
 
+## Direction: custom software they own
+
+Decision: build custom software. The goal is for the company to own all of its data instead of paying separate vendors and agencies for each task.
+
+What "own" means in practice:
+
+- **Every account is in the company's name:** hosting, database, code repository, phone provider, domain. The builder gets access but owns none of them, so the company never depends on a single person to get to its own data.
+- **Standard database (Postgres):** the data can be exported or moved to a different host without permission from anyone.
+- **Documented:** a written runbook covering how it's deployed, backed up and restored, so another developer could take it over.
+
+Custom doesn't mean building every piece by hand. A few parts are risky or impractical to build, so the system **rents the plumbing but keeps the data**:
+
+| Need | Rent | Keep in our database |
+|---|---|---|
+| Phone calls | A telephony API (e.g. Twilio) that answers, records and transcribes | Recordings, transcripts, summaries, receptionist IDs |
+| Payroll and tax filing | Their existing payroll/accounting tool | Timesheets (exported to payroll) |
+| E-signatures | An e-sign service, or a simple signed-PDF flow | Signed documents and completion status |
+| AI summaries | Claude API | The summaries and tags it produces |
+
+Proposed stack (draft): a web app that installs on techs' phones from the browser (no app store), with Postgres, login and file storage behind it (e.g. Supabase), hosted on the company's own account.
+
+### Phasing
+
+Don't build all five areas at once. Ship the part with the most daily value first, then let real use shape the rest.
+
+1. **Jobs, scheduling, clock in/out** (technician and manager). This is the core and gets used every day.
+2. **Shop tickets.** Small, and connects to phase 1.
+3. **Reception calls and voicemail.** Depends on moving the phone line to a provider with an API.
+4. **HR onboarding.** Holds the most sensitive data, so it's built last, once access control is proven.
+
+### Costs to be upfront about
+
+Custom software has running costs that a subscription hides: hosting, phone usage, AI usage, backups, security updates, and someone to maintain it. Price ongoing support as its own line item so it isn't a surprise. To make the case on numbers, get **what they pay today** for each separate vendor or agency and compare it with build cost plus running costs. Don't estimate those figures without their real numbers.
+
 ## Open questions before any quote
 
-These decide the stack. Don't pick tools until they're answered.
-
-- What do they use **today** for scheduling, invoicing and payroll? (QuickBooks? Jobber? paper?) If they already pay for field-service software, connecting to it may beat replacing it.
-- What **phone system** do they use? Recording and transcription should come from the phone provider (most VoIP systems offer it), not be built from scratch.
+- What do they pay **today**, and to whom, for each task this would replace? This number is the business case.
+- What do they use for invoicing and payroll? Timesheets need to feed into it.
+- Which **phone provider** and number do they have now? Can the number be ported to a provider with an API?
 - How many techs, trucks and receptionists? Do techs all have smartphones?
 - Payroll: does clock in/out need to feed payroll directly, or is it for job costing only?
 - Which onboarding documents and trainings do they actually use today? The checklist in the mockup is a reasonable starting template, not their real one.
@@ -54,7 +87,7 @@ These decide the stack. Don't pick tools until they're answered.
 - **Call recording:** Washington requires consent from everyone on the call (RCW 9.73.030). Every recorded call needs an announcement. The mockup transcripts open with one.
 - **Pesticide application:** applying pesticides for hire in WA requires a WSDA license. It's shown as a role-based training item.
 - **Heat / smoke:** WA L&I has outdoor heat exposure and wildfire smoke rules for outdoor workers. They're in the training template.
-- Employee records (I-9s, IDs) and call recordings are sensitive. The real build needs per-role access control (a tech shouldn't see HR files).
+- Employee records (I-9s, IDs) and call recordings are sensitive. The real build needs per-role access control (a tech shouldn't see HR files), encrypted storage and backups. Owning the data also means being responsible for protecting it. Avoid storing Social Security numbers in the app if payroll already holds them.
 
 ## Sample data
 
