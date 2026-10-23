@@ -191,6 +191,8 @@ mark{background:#ffe79a;padding:0 1px;border-radius:2px}
 .map-ini{font-size:12px;font-weight:700;fill:#fff;pointer-events:none}
 .map-pin{cursor:pointer}
 @media (prefers-reduced-motion:reduce){.map-pin animate{display:none}.pulse{animation:none}}
+.nav-links{display:inline-flex;flex-wrap:wrap;gap:6px}
+.nav-links .btn{text-decoration:none;color:var(--text)}
 .kv{display:grid;grid-template-columns:120px 1fr;gap:6px 12px;font-size:13px}
 .kv dt{color:var(--muted)}
 .kv dd{margin:0}
@@ -418,6 +420,11 @@ const taskCount = j => j.services.reduce((a,s)=>a+s.tasks.length,0);
 const elapsed = j => j.clockIn ? ((j.clockOut||Date.now()) - j.clockIn) : 0;
 const statusBadge = s => ({scheduled:'<span class="badge b-blue">Scheduled</span>', in_progress:'<span class="badge b-green"><span class="dot pulse"></span>On site</span>', done:'<span class="badge b-gray">Complete</span>'}[s]);
 const prioBadge = p => `<span class="badge ${p==='High'?'b-red':p==='Medium'?'b-amber':'b-gray'}">${p}</span>`;
+/* one tap from an address to turn-by-turn directions */
+function mapLinks(addr){
+  const q = encodeURIComponent(addr + ', WA');
+  return `<span class="nav-links"><a class="btn btn-sm" href="https://www.google.com/maps/dir/?api=1&destination=${q}" target="_blank" rel="noopener">🧭 Google Maps</a><a class="btn btn-sm" href="https://maps.apple.com/?daddr=${q}" target="_blank" rel="noopener">🧭 Apple Maps</a></span>`;
+}
 function locBadge(j, which){
   const loc = which==='out' ? j.outLoc : j.inLoc; if(!loc) return '';
   const ft = distFt(loc, client(j.clientId).pos);
@@ -500,6 +507,7 @@ function phoneScreen(t){
           <div class="row between"><span class="small muted">${fmt12(j.start)} · est. ${j.est} min</span>${statusBadge(j.status)}</div>
           <div class="t" style="margin-top:4px">${esc(c.name)}</div>
           <div class="small muted">${esc(c.address)}</div>
+          <div style="margin-top:8px">${mapLinks(c.address)}</div>
           <div class="small" style="margin-top:6px">${j.services.map(s=>esc(s.name)).join(' · ')}</div>
         </div>`}).join(''):'<div class="empty">No jobs today.</div>'}`;
   } else if(ui.techTab==='time'){
@@ -550,7 +558,7 @@ function phoneJob(t, j){
       <p class="small muted" style="margin:8px 2px 0;text-align:center">📍 Your location is shared with the office only while you're clocked in.</p>
       <div class="card card-pad" style="margin-top:12px">
         <h3>Client</h3>
-        <dl class="kv"><dt>Contact</dt><dd>${esc(c.contact)}</dd><dt>Phone</dt><dd>${esc(c.phone)}</dd><dt>Address</dt><dd>${esc(c.address)}</dd></dl>
+        <dl class="kv"><dt>Contact</dt><dd>${esc(c.contact)}</dd><dt>Phone</dt><dd>${esc(c.phone)}</dd><dt>Address</dt><dd>${esc(c.address)}<div style="margin-top:6px">${mapLinks(c.address)}</div></dd></dl>
         <div class="note" style="margin-top:10px">📝 ${esc(c.notes)}</div>
       </div>
       <div class="card card-pad" style="margin-top:12px">
@@ -672,7 +680,7 @@ function jobModalHTML(j){
   <div class="modal-body stack">
     <div>${statusBadge(j.status)} ${j.clockIn?`<span class="small muted">Clocked in ${fmtTime(j.clockIn)}${j.clockOut?` · out ${fmtTime(j.clockOut)} · ${fmtHM(elapsed(j))}`:''} (est. ${j.est} min)</span>`:''}</div>
     ${j.inLoc?`<div class="row wrap"><span class="small muted">Clock-in</span>${locBadge(j,'in')}${j.outLoc?`<span class="small muted">Clock-out</span>${locBadge(j,'out')}`:''}</div>`:''}
-    <dl class="kv"><dt>Contact</dt><dd>${esc(c.contact)} · ${esc(c.phone)}</dd><dt>Address</dt><dd>${esc(c.address)}</dd><dt>Plan</dt><dd>${esc(c.plan)}</dd><dt>Site notes</dt><dd>${esc(c.notes)}</dd></dl>
+    <dl class="kv"><dt>Contact</dt><dd>${esc(c.contact)} · ${esc(c.phone)}</dd><dt>Address</dt><dd>${esc(c.address)}<div style="margin-top:6px">${mapLinks(c.address)}</div></dd><dt>Plan</dt><dd>${esc(c.plan)}</dd><dt>Site notes</dt><dd>${esc(c.notes)}</dd></dl>
     <div><b>Services</b>${j.services.map(s=>`<div class="svc"><span>${esc(s.name)}</span><b>${s.price?money(s.price):'Project'}</b></div>`).join('')}
       <div class="svc"><b>Total</b><b>${jobTotal(j)?money(jobTotal(j)):'Per project contract'}</b></div></div>
     <div><label class="f">Reassign technician</label><select data-action="reassign" data-id="${j.id}">${state.techs.map(x=>`<option value="${x.id}" ${x.id===j.techId?'selected':''}>${esc(x.name)}</option>`).join('')}</select></div>
@@ -849,6 +857,7 @@ const ROLE_TRAININGS = {
    EVENTS
    ========================================================= */
 document.addEventListener('click', e=>{
+  if(e.target.closest('a[href]')) return;
   const el = e.target.closest('[data-action]');
   if(!el || el.tagName==='SELECT') return;
   const a = el.dataset.action, id = el.dataset.id, ui = state.ui;
