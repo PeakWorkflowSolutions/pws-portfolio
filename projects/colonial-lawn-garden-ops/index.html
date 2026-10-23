@@ -200,6 +200,11 @@ mark{background:#ffe79a;padding:0 1px;border-radius:2px}
 .trunc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .av-lg{width:44px;height:44px;font-size:15px}
 .av-xl{width:52px;height:52px;font-size:17px}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.invoice{border:1px solid var(--line);border-radius:10px;padding:4px 14px;margin:12px 0;background:var(--surface-2)}
+.inv-line{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.inv-total{font-weight:700;border-bottom:0;font-size:15px}
+.inv-disc{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--green-50);border:1px solid #cfe5d1;color:var(--green-800);border-radius:8px;padding:10px 12px;margin:0 -6px 10px}
 .kv{display:grid;grid-template-columns:120px 1fr;gap:6px 12px;font-size:13px}
 .kv dt{color:var(--muted)}
 .kv dd{margin:0}
@@ -233,7 +238,7 @@ mark{background:#ffe79a;padding:0 1px;border-radius:2px}
    Everything is sample data, stored in this browser only.
    ========================================================= */
 
-const STORE_KEY = 'clg-ops-demo-v3';
+const STORE_KEY = 'clg-ops-demo-v4';
 
 /* ---------- location (schematic map units; 1 unit ≈ 26 ft) ---------- */
 const FT_PER_UNIT = 26.4, GEOFENCE_FT = 500;
@@ -256,6 +261,7 @@ function fmtDur(ms){ const s = Math.max(0,Math.floor(ms/1000)); const h=Math.flo
 function fmtHM(ms){ const m = Math.round(ms/60000); return Math.floor(m/60)+'h '+(m%60)+'m'; }
 function fmt12(hhmm){ const [h,m]=hhmm.split(':').map(Number); const ap=h>=12?'PM':'AM'; return ((h+11)%12+1)+':'+String(m).padStart(2,'0')+' '+ap; }
 function money(n){ return '$'+n.toLocaleString(undefined,{minimumFractionDigits:0}); }
+function money2(n){ return '$'+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function esc(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function initials(n){ return n.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
 
@@ -314,6 +320,22 @@ function seed(){
     if(j.clockIn) j.inLoc = near(p, 0.8+Math.random()*2);
     if(j.clockOut) j.outLoc = near(p, 0.8+Math.random()*2); });
   jobs[0].outLoc = {x:clients.C2.pos.x+112, y:clients.C2.pos.y+38}; // clocked out from the road
+  const L = j => j.services.filter(x=>x.price>0).map(x=>({name:x.name, price:x.price}));
+  const IV = (id,clientId,jobIds,lines,created,status,extra={}) => ({id,clientId,jobIds,lines,created,status,
+    terms: ['C2','C4','C7'].includes(clientId) ? 'Net 30' : 'Due in 15 days', sentAt:null, due:null, paid:null, reminders:0, ...extra});
+  const sent = (ago, net) => ({sentAt: now-ago*DAY, due: now-ago*DAY+net*DAY});
+  const paidBy = (method, total, ago) => ({method, amount: method==='credit' ? total : Math.round(total*97)/100, at: now-ago*DAY});
+  const invoices = [
+    IV('INV-1103','C3',[jobs[5].id],L(jobs[5]),now-3*3600e3,'draft'),
+    IV('INV-1102','C2',[jobs[0].id],L(jobs[0]),now-3*3600e3,'draft'),
+    IV('INV-1101','C7',[jobs[14].id],L(jobs[14]),now-DAY,'sent',sent(1,30)),
+    IV('INV-1100','C1',[jobs[15].id],L(jobs[15]),now-DAY,'paid',{...sent(1,15), paid:paidBy('debit',85,0.8)}),
+    IV('INV-1099','C5',[],[{name:'Paver patio + drip install · 50% deposit',price:4200}],now-6*DAY,'paid',{...sent(6,15), paid:paidBy('ach',4200,5)}),
+    IV('INV-1098','C8',[],[{name:'Weekly mow & edge · October (4 visits)',price:220}],now-7*DAY,'paid',{...sent(7,15), paid:paidBy('credit',220,6)}),
+    IV('INV-1097','C6',[],[{name:'Fall leaf cleanup',price:210}],now-12*DAY,'paid',{...sent(12,15), paid:paidBy('check',210,9)}),
+    IV('INV-1096','C4',[],[{name:'HOA grounds maintenance · September',price:1450}],now-36*DAY,'sent',sent(36,30)),
+    IV('INV-1095','C2',[],[{name:'Commercial maintenance · September',price:560}],now-36*DAY,'paid',{...sent(36,30), paid:paidBy('ach',560,20)}),
+  ];
   const equipment = [
     {id:'M-07', name:'Toro Z-Master 60" zero-turn', type:'Mower', status:'Down'},
     {id:'M-04', name:'Exmark Lazer Z 52"', type:'Mower', status:'OK'},
@@ -408,6 +430,7 @@ function seed(){
   employees[1].train = {saf:true,cs:false,app:true};
   return {techs,clients,jobs,equipment,tickets,receptionists,calls,paperwork,trainings,employees,
     staff: seedStaff(),
+    invoices, nextInv:1104,
     ui:{role:'tech', techId:'T1', techJob:null, techTab:'today', recId:'ALL', callSel:'CL-2041', callFilter:'all', search:'', hrSel:'E21', mechFilter:'open', mgrDay:dayKey(0)},
     nextTicket:119, nextEmp:24};
 }
@@ -477,13 +500,14 @@ const ROLES = [
   ['mgr','Manager'],
   ['mech','Shop / Mechanics'],
   ['rec','Reception'],
+  ['bill','Billing'],
   ['hr','HR & Onboarding'],
   ['team','Team'],
 ];
 function renderTabs(){
   const openT = state.tickets.filter(t=>t.status!=='Resolved').length;
   const vmOpen = state.calls.filter(c=>c.type==='voicemail' && !c.handled).length;
-  const counts = {mech:openT, rec:vmOpen};
+  const counts = {mech:openT, rec:vmOpen, bill:state.invoices.filter(i=>i.status==='draft').length};
   document.getElementById('roleTabs').innerHTML = ROLES.map(([k,l])=>
     `<button class="role-tab ${state.ui.role===k?'active':''}" data-action="role" data-role="${k}">${l}${counts[k]?`<span class="ct">${counts[k]}</span>`:''}</button>`).join('');
 }
@@ -491,7 +515,7 @@ function renderTabs(){
 function render(){
   renderTabs();
   const v = document.getElementById('view');
-  v.innerHTML = ({tech:viewTech, mgr:viewMgr, mech:viewMech, rec:viewRec, hr:viewHR, team:viewTeam}[state.ui.role])();
+  v.innerHTML = ({tech:viewTech, mgr:viewMgr, mech:viewMech, rec:viewRec, bill:viewBill, hr:viewHR, team:viewTeam}[state.ui.role])();
   save();
 }
 
@@ -649,6 +673,7 @@ function viewMgr(){
         ${state.calls.filter(c=>c.type==='voicemail'&&!c.handled).map(c=>`<div class="row" style="align-items:flex-start"><span class="badge b-amber">Voicemail</span><div class="small"><b>${esc(c.caller)}</b> · ${fmtDateTime(c.ts)}<br><span class="muted">${esc(c.summary)}</span></div></div>`).join('')}
         ${today.filter(locFlagged).map(j=>{ const bad = j.outLoc && distFt(j.outLoc, client(j.clientId).pos)>GEOFENCE_FT ? 'out' : 'in'; return `<div class="row" style="align-items:flex-start"><span class="badge b-red">Location</span><div class="small"><b>${esc(tech(j.techId).name)}</b> clocked ${bad} ${fmtDist(distFt(bad==='out'?j.outLoc:j.inLoc, client(j.clientId).pos))} from ${esc(client(j.clientId).name)}<br><span class="muted">Hours may need review before payroll.</span></div></div>`; }).join('')}
         ${today.filter(j=>j.status==='in_progress' && elapsed(j)>j.est*60e3).map(j=>`<div class="row" style="align-items:flex-start"><span class="badge b-red">Over estimate</span><div class="small"><b>${esc(client(j.clientId).name)}</b><br><span class="muted">${esc(tech(j.techId).name)} · est. ${j.est} min</span></div></div>`).join('')}
+        ${state.invoices.filter(isOverdue).map(i=>`<div class="row" style="align-items:flex-start"><span class="badge b-red">Overdue</span><div class="small"><b>${esc(client(i.clientId).name)}</b> · ${money2(invTotal(i))}<br><span class="muted">${i.id} · ${daysLate(i)} days past due</span></div></div>`).join('')}
         <div class="row" style="align-items:flex-start"><span class="badge b-green">Revenue</span><div class="small"><b>${money(revenue)}</b> in completed work today</div></div>
       </div>
     </div>
@@ -833,6 +858,83 @@ function callDetail(c,q){
 }
 
 /* =========================================================
+   BILLING (office side; customers pay through Pay Bill on the website)
+   ========================================================= */
+const DISCOUNT = 0.03;
+const METHODS = {credit:'Credit card', debit:'Debit card', ach:'Bank transfer (ACH)', check:'Check', cash:'Cash'};
+const invTotal = i => i.lines.reduce((a,l)=>a+l.price,0);
+const discTotal = i => Math.round(invTotal(i)*(1-DISCOUNT)*100)/100;
+const isOverdue = i => i.status==='sent' && i.due && i.due < Date.now();
+const daysLate = i => Math.floor((Date.now()-i.due)/DAY);
+function invStatus(i){
+  if(i.status==='draft') return '<span class="badge b-amber">Ready to review</span>';
+  if(i.status==='paid') return `<span class="badge b-green">Paid · ${i.paid.method==='credit'?'Credit':'3% discount'}</span>`;
+  if(isOverdue(i)) return `<span class="badge b-red">Overdue · ${daysLate(i)}d</span>`;
+  return '<span class="badge b-blue">Sent</span>';
+}
+function draftFromJob(j){
+  const lines = j.services.filter(x=>x.price>0).map(x=>({name:x.name, price:x.price}));
+  if(!lines.length || state.invoices.some(i=>i.jobIds.includes(j.id))) return null;
+  const inv = {id:'INV-'+(state.nextInv++), clientId:j.clientId, jobIds:[j.id], lines, created:Date.now(), status:'draft',
+    terms: ['C2','C4','C7'].includes(j.clientId)?'Net 30':'Due in 15 days', sentAt:null, due:null, paid:null, reminders:0};
+  state.invoices.unshift(inv); return inv;
+}
+function viewBill(){
+  const ui = state.ui, f = ui.invFilter||'all', now = Date.now();
+  const inv = state.invoices;
+  const drafts = inv.filter(i=>i.status==='draft'), open = inv.filter(i=>i.status==='sent'), over = open.filter(isOverdue);
+  const paid7 = inv.filter(i=>i.status==='paid' && i.paid.at > now-7*DAY);
+  const sum = (l,fn=invTotal) => l.reduce((a,i)=>a+fn(i),0);
+  const discShare = paid7.length ? Math.round(paid7.filter(i=>i.paid.method!=='credit').length/paid7.length*100) : 0;
+  const list = inv.filter(i => f==='all' || (f==='overdue'?isOverdue(i): f==='sent'? (i.status==='sent'&&!isOverdue(i)) : i.status===f));
+  const sel = inv.find(i=>i.id===ui.invSel) || list[0];
+  const chip = (k,l,n) => `<button class="rec-chip ${f===k?'on':''}" style="padding:5px 12px" data-action="invFilter" data-f="${k}">${l} <span class="muted" style="font-weight:400">${n}</span></button>`;
+  return `
+  <div class="page-head"><div><h2>Billing</h2><p>Invoices are drafted automatically when a job is finished. The office reviews and sends them, and customers pay through Pay Bill on the website.</p></div></div>
+  <div class="grid g-4" style="margin-bottom:16px">
+    <div class="card card-pad kpi"><div class="n">${drafts.length}</div><div class="l">Ready to review · ${money2(sum(drafts))}</div></div>
+    <div class="card card-pad kpi"><div class="n">${money(Math.round(sum(open)))}</div><div class="l">Outstanding · ${open.length} invoice${open.length===1?'':'s'}</div></div>
+    <div class="card card-pad kpi"><div class="n" style="${over.length?'color:var(--red)':''}">${money(Math.round(sum(over)))}</div><div class="l">Overdue · ${over.length} invoice${over.length===1?'':'s'}</div></div>
+    <div class="card card-pad kpi"><div class="n">${money(Math.round(sum(paid7,i=>i.paid.amount)))}</div><div class="l">Collected last 7 days · ${discShare}% paid without a credit card</div></div>
+  </div>
+  <div class="grid g-side">
+    <div class="card card-pad">
+      <div class="row wrap" style="margin-bottom:10px">${chip('all','All',inv.length)}${chip('draft','To review',drafts.length)}${chip('sent','Sent',open.length-over.length)}${chip('overdue','Overdue',over.length)}${chip('paid','Paid',inv.filter(i=>i.status==='paid').length)}</div>
+      <div class="table-wrap"><table><thead><tr><th>Invoice</th><th>Client</th><th>Date</th><th style="text-align:right">Amount</th><th>Status</th></tr></thead>
+        <tbody>${list.map(i=>`<tr class="click ${sel&&i.id===sel.id?'sel':''}" data-action="invPick" data-id="${i.id}">
+          <td><b>${i.id}</b></td><td>${esc(client(i.clientId).name)}<div class="small muted">${esc(i.lines[0].name)}${i.lines.length>1?` +${i.lines.length-1} more`:''}</div></td>
+          <td class="small">${new Date(i.created).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</td>
+          <td class="num"><b>${money2(i.status==='paid'?i.paid.amount:invTotal(i))}</b></td><td>${invStatus(i)}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">Nothing here.</td></tr>'}</tbody></table></div>
+    </div>
+    <div class="card card-pad">${sel?invDetail(sel):'<div class="empty">Select an invoice.</div>'}</div>
+  </div>
+  <div class="note" style="margin-top:16px">How the 3% works: every invoice shows the full price, and paying by debit card, bank transfer, check or cash takes 3% off. On the website's Pay Bill page, debit cards are recognized as they're entered, so the discount applies before the customer pays. Confirm the program setup with the payment processor before launch.</div>`;
+}
+function invDetail(i){
+  const c = client(i.clientId), j = i.jobIds.length ? job(i.jobIds[0]) : null, total = invTotal(i), disc = discTotal(i);
+  let actions = '';
+  if(i.status==='draft') actions = `<button class="btn btn-primary" data-action="invSend" data-id="${i.id}">Approve &amp; send</button><span class="small muted">Texts and emails ${esc(c.contact.replace(/^.*: /,''))} a Pay Bill link</span>`;
+  else if(i.status==='sent') actions = `
+    <div class="stack" style="width:100%">
+      <div class="row wrap"><select id="payMethod" style="width:auto">${Object.entries(METHODS).map(([k,v])=>`<option value="${k}" ${k==='check'?'selected':''}>${v}</option>`).join('')}</select>
+        <button class="btn btn-primary" data-action="invRecord" data-id="${i.id}">Record payment</button>
+        ${isOverdue(i)?`<button class="btn" data-action="invRemind" data-id="${i.id}">Send reminder</button>`:''}</div>
+      <div class="row wrap small"><span class="muted">Demo: customer pays online with</span><button class="btn btn-sm" data-action="invOnline" data-id="${i.id}" data-m="debit">Debit card</button><button class="btn btn-sm" data-action="invOnline" data-id="${i.id}" data-m="credit">Credit card</button></div>
+    </div>`;
+  return `
+    <div class="row between" style="align-items:flex-start"><div><div class="small muted">${i.id} · ${esc(i.terms)}</div><h3 style="margin:2px 0 0">${esc(c.name)}</h3><div class="small muted">${esc(c.address)}</div></div>${invStatus(i)}</div>
+    ${j?`<div class="small muted" style="margin-top:8px">From job on ${fmtDay(j.date)} · ${esc(tech(j.techId).name)}${j.clockIn&&j.clockOut?` · ${fmtHM(elapsed(j))} on site`:''}</div>`:''}
+    <div class="invoice">
+      ${i.lines.map(l=>`<div class="inv-line"><span>${esc(l.name)}</span><span class="num">${money2(l.price)}</span></div>`).join('')}
+      <div class="inv-line inv-total"><span>Total</span><span class="num">${money2(total)}</span></div>
+      <div class="inv-disc"><div><b>Pay by debit card, bank transfer, check or cash</b><div class="small">3% discount · you save ${money2(total-disc)}</div></div><b class="num">${money2(disc)}</b></div>
+    </div>
+    ${i.status==='paid'?`<div class="note" style="background:var(--green-50);border-color:#cfe5d1;color:var(--green-800)"><b>Paid ${money2(i.paid.amount)}</b> by ${METHODS[i.paid.method]} on ${new Date(i.paid.at).toLocaleDateString(undefined,{month:'short',day:'numeric'})}${i.paid.method==='credit'?' · full price':` · 3% discount applied (${money2(total-i.paid.amount)})`}</div>`:''}
+    ${i.sentAt&&i.status!=='paid'?`<div class="small muted" style="margin-bottom:10px">Sent ${new Date(i.sentAt).toLocaleDateString(undefined,{month:'short',day:'numeric'})} · due ${new Date(i.due).toLocaleDateString(undefined,{month:'short',day:'numeric'})}${i.reminders?` · ${i.reminders} reminder${i.reminders>1?'s':''} sent`:''}</div>`:''}
+    <div class="row wrap">${actions}</div>`;
+}
+
+/* =========================================================
    HR & ONBOARDING
    ========================================================= */
 /* =========================================================
@@ -966,7 +1068,7 @@ document.addEventListener('click', e=>{
     case 'closeJob': ui.techJob = null; ui.techTab='today'; break;
     case 'techTab': ui.techTab = el.dataset.tab; if(el.dataset.tab!=='report') ui.techJob=null; else ui.reportFrom = ui.techJob; ui.techJob = null; break;
     case 'clockIn': { const j=job(id); const other=state.jobs.find(x=>x.techId===j.techId&&x.status==='in_progress'); if(other){ toast('Clock out of '+client(other.clientId).name+' first'); return; } locate(j, ()=>{ j.status='in_progress'; j.clockIn=Date.now(); j.inLoc=fakeFix(j); toast('Clocked in at '+fmtTime(j.clockIn)+(distFt(j.inLoc,client(j.clientId).pos)>GEOFENCE_FT?' · flagged: away from property':'')); }); return; }
-    case 'clockOut': { const j=job(id); const left=taskCount(j)-j.done.length; locate(j, ()=>{ j.status='done'; j.clockOut=Date.now(); j.outLoc=fakeFix(j); toast('Clocked out · '+fmtHM(elapsed(j))+' on site'+(left?` · ${left} task${left>1?'s':''} left unchecked`:'')); }); return; }
+    case 'clockOut': { const j=job(id); const left=taskCount(j)-j.done.length; locate(j, ()=>{ j.status='done'; j.clockOut=Date.now(); j.outLoc=fakeFix(j); const inv=draftFromJob(j); toast('Clocked out · '+fmtHM(elapsed(j))+' on site'+(left?` · ${left} task${left>1?'s':''} left unchecked`:'')+(inv?` · ${inv.id} drafted for billing`:'')); }); return; }
     case 'toggleTask': { const j=job(id); const k=el.dataset.k; j.done = j.done.includes(k)? j.done.filter(x=>x!==k) : [...j.done,k]; break; }
     case 'submitReport': {
       const title=document.getElementById('rTitle').value.trim(); if(!title){ toast('Describe what\'s wrong'); return; }
@@ -993,6 +1095,14 @@ document.addEventListener('click', e=>{
     case 'vmDone': state.calls.find(c=>c.id===id).handled = true; toast('Voicemail marked as returned'); break;
     // hr
     case 'hrPick': ui.hrSel = id; break;
+    // billing
+    case 'invFilter': ui.invFilter = el.dataset.f; ui.invSel = null; break;
+    case 'invPick': ui.invSel = id; break;
+    case 'invSend': { const i=state.invoices.find(x=>x.id===id); i.status='sent'; i.sentAt=Date.now(); i.due=Date.now()+(i.terms==='Net 30'?30:15)*DAY; toast(i.id+' sent to '+client(i.clientId).name); break; }
+    case 'invRemind': { const i=state.invoices.find(x=>x.id===id); i.reminders++; toast('Reminder sent with a Pay Bill link'); break; }
+    case 'invRecord': case 'invOnline': { const i=state.invoices.find(x=>x.id===id); const m = a==='invOnline' ? el.dataset.m : document.getElementById('payMethod').value;
+      i.status='paid'; i.paid={method:m, amount: m==='credit'?invTotal(i):discTotal(i), at:Date.now()};
+      toast((a==='invOnline'?'Online payment received · ':'Payment recorded · ')+money2(i.paid.amount)+(m==='credit'?' (credit, full price)':' (3% discount)')); break; }
     // team
     case 'teamDept': ui.teamDept = el.dataset.dept; break;
     case 'profile': openModal(profileHTML(state.staff.find(p=>p.id===id))); return;

@@ -16,6 +16,7 @@ Open [index.html](index.html) in a browser. It runs from one file and saves demo
 | Manager | Dashboard | Crews on site right now with live timers vs. estimate, jobs done, hours logged, a "needs attention" feed (equipment down, unreturned voicemails, jobs running over), week schedule by tech, schedule/reassign jobs |
 | Shop / Mechanics | Ticket board | New → In Progress → Waiting on Parts → Resolved, repair log per ticket, equipment roster with status that updates from tickets |
 | Reception | Call log | Calls and voicemails with recording, transcript and AI summary, filed by receptionist ID (REC-01, REC-02…), full-text search across transcripts, mark voicemails returned |
+| Billing (office) | Invoices | Drafted automatically when a tech clocks out, reviewed and sent by the office. Every invoice shows the full price plus a 3% discount for debit, bank transfer, check or cash. Record payments, send reminders, track overdue. Customers pay through Pay Bill on the website (not in the mockup) |
 | HR | Onboarding | New hires with paperwork + training checklists templated by role, progress per person |
 | Everyone | Team directory | Profile for every employee: role, work phone and email (with copy buttons), start date and tenure, reports to, languages, certifications, and live status (on site, driving, onboarding). Searchable and filterable by department. Personal details stay in HR |
 
