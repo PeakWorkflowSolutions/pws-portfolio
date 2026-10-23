@@ -17,6 +17,7 @@ Open [index.html](index.html) in a browser. It runs from one file and saves demo
 | Shop / Mechanics | Ticket board | New → In Progress → Waiting on Parts → Resolved, repair log per ticket, equipment roster with status that updates from tickets |
 | Reception | Call log | Calls and voicemails with recording, transcript and AI summary, filed by receptionist ID (REC-01, REC-02…), full-text search across transcripts, mark voicemails returned |
 | HR | Onboarding | New hires with paperwork + training checklists templated by role, progress per person |
+| Everyone | Team directory | Profile for every employee: role, work phone and email (with copy buttons), start date and tenure, reports to, languages, certifications, and live status (on site, driving, onboarding). Searchable and filterable by department. Personal details stay in HR |
 
 ## Technician location
 

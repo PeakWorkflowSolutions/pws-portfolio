@@ -193,6 +193,13 @@ mark{background:#ffe79a;padding:0 1px;border-radius:2px}
 @media (prefers-reduced-motion:reduce){.map-pin animate{display:none}.pulse{animation:none}}
 .nav-links{display:inline-flex;flex-wrap:wrap;gap:6px}
 .nav-links .btn{text-decoration:none;color:var(--text)}
+.team-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.person{cursor:pointer;display:flex;flex-direction:column;gap:12px}
+.person:hover,.person:focus-visible{border-color:var(--green-700);outline:none}
+.person-contact{border-top:1px solid var(--line);padding-top:10px;display:grid;gap:4px}
+.trunc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.av-lg{width:44px;height:44px;font-size:15px}
+.av-xl{width:52px;height:52px;font-size:17px}
 .kv{display:grid;grid-template-columns:120px 1fr;gap:6px 12px;font-size:13px}
 .kv dt{color:var(--muted)}
 .kv dd{margin:0}
@@ -226,7 +233,7 @@ mark{background:#ffe79a;padding:0 1px;border-radius:2px}
    Everything is sample data, stored in this browser only.
    ========================================================= */
 
-const STORE_KEY = 'clg-ops-demo-v2';
+const STORE_KEY = 'clg-ops-demo-v3';
 
 /* ---------- location (schematic map units; 1 unit ≈ 26 ft) ---------- */
 const FT_PER_UNIT = 26.4, GEOFENCE_FT = 500;
@@ -400,8 +407,32 @@ function seed(){
   // Jenna: receptionist only needs a subset of trainings
   employees[1].train = {saf:true,cs:false,app:true};
   return {techs,clients,jobs,equipment,tickets,receptionists,calls,paperwork,trainings,employees,
+    staff: seedStaff(),
     ui:{role:'tech', techId:'T1', techJob:null, techTab:'today', recId:'ALL', callSel:'CL-2041', callFilter:'all', search:'', hrSel:'E21', mechFilter:'open', mgrDay:dayKey(0)},
     nextTicket:119, nextEmp:24};
+}
+
+/* Directory: work contact info anyone can see. Links to techs/receptionists/new hires drive the live status. */
+function seedStaff(){
+  const P = (id,name,role,dept,branch,phone,start,reportsTo,langs,certs,about,link={}) => ({id,name,role,dept,branch,
+    email: name.split(' ')[0][0].toLowerCase()+name.split(' ').slice(-1)[0].toLowerCase()+'@coloniallawn.com', phone, start, reportsTo, langs, certs, about, ...link});
+  return [
+    P('S01','Rachel Kim','Operations Manager','Management','Yakima','(509) 555-0101','2016-03-14','Owner',['English'],['WSDA Commercial Pesticide Applicator'],'Runs scheduling and crews for the Yakima branch. First call for anything job-related that a crew lead can\'t sort out.'),
+    P('S02','Brian Tate','Branch Manager','Management','Tri-Cities','(509) 555-0102','2018-02-05','Owner',['English'],['Certified Landscape Technician'],'Manages the Tri-Cities branch crews and commercial accounts in Kennewick, Pasco and Richland.'),
+    P('S03','Carla Mendez','Office Manager','Office','Yakima','(509) 555-0103','2017-08-21','Rachel Kim',['English','Spanish'],[],'Billing, payroll questions, HR paperwork and supplies. In the office Mon–Fri, 7:30–4:30.'),
+    P('S04','Dave Whitaker','Shop Lead','Shop','Yakima','(509) 555-0104','2015-04-06','Rachel Kim',['English'],['Small engine repair (Toro, Exmark, Stihl)'],'Keeps every mower, blower and truck running. Report breakdowns through the app so they land in his queue.'),
+    P('S05','Luis Ramirez','Crew Lead · Maintenance','Field crews','Yakima','(509) 555-0111','2019-03-11','Rachel Kim',['English','Spanish'],['Zero-turn trainer','First aid / CPR'],'Leads Crew A. Signs off new techs on mower operation.',{techId:'T1'}),
+    P('S06','Jake Morrison','Landscape Technician','Field crews','Yakima','(509) 555-0112','2022-04-18','Luis Ramirez',['English'],['Trailer & load securement'],'Crew A. Commercial maintenance routes.',{techId:'T2'}),
+    P('S07','Ana Villanueva','Crew Lead · Irrigation','Field crews','Yakima','(509) 555-0113','2020-05-04','Rachel Kim',['English','Spanish'],['Backflow assembly tester','Irrigation technician'],'Leads Crew B. Go-to for sprinkler, drip and winterization questions.',{techId:'T3'}),
+    P('S08','Tyler Brooks','Crew Lead · Install','Field crews','Yakima','(509) 555-0114','2021-02-22','Rachel Kim',['English'],['Paver installer','Equipment operator'],'Leads Crew C. Patios, walls, plantings and new installs. Also does estimate walks.',{techId:'T4'}),
+    P('S09','Sofia Reyes','Irrigation Technician','Field crews','Yakima','(509) 555-0115',dayKey(-21),'Ana Villanueva',['English','Spanish'],[],'Crew B. Joined this season.',{empId:'E19'}),
+    P('S10','Marco Sandoval','Landscape Technician','Field crews','Yakima','(509) 555-0116',dayKey(-3),'Luis Ramirez',['English','Spanish'],[],'Crew A. New this week. Say hi!',{empId:'E21'}),
+    P('S11','Derek Pollard','Small Engine Mechanic','Shop','Yakima','(509) 555-0117',dayKey(4),'Dave Whitaker',['English'],['Small engine repair'],'Joins the shop next week.',{empId:'E23'}),
+    P('S12','Maria Delgado','Receptionist · REC-01','Office','Yakima','(509) 555-0121','2020-09-08','Carla Mendez',['English','Spanish'],[],'Front desk lead. Handles scheduling requests and estimate bookings.',{recId:'REC-01'}),
+    P('S13','Brenda Hale','Receptionist · REC-02','Office','Yakima','(509) 555-0122','2023-01-16','Carla Mendez',['English'],[],'Front desk. Commercial and HOA accounts.',{recId:'REC-02'}),
+    P('S14','Sam Ortiz','Receptionist · REC-03','Office','Tri-Cities','(509) 555-0123','2024-03-04','Brian Tate',['English','Spanish'],[],'Answers the Tri-Cities line and handles project updates.',{recId:'REC-03'}),
+    P('S15','Jenna Wu','Receptionist','Office','Yakima','(509) 555-0124',dayKey(-1),'Carla Mendez',['English'],[],'New this week. Training on the front desk with Maria.',{empId:'E22'}),
+  ];
 }
 
 let state;
@@ -447,6 +478,7 @@ const ROLES = [
   ['mech','Shop / Mechanics'],
   ['rec','Reception'],
   ['hr','HR & Onboarding'],
+  ['team','Team'],
 ];
 function renderTabs(){
   const openT = state.tickets.filter(t=>t.status!=='Resolved').length;
@@ -459,7 +491,7 @@ function renderTabs(){
 function render(){
   renderTabs();
   const v = document.getElementById('view');
-  v.innerHTML = ({tech:viewTech, mgr:viewMgr, mech:viewMech, rec:viewRec, hr:viewHR}[state.ui.role])();
+  v.innerHTML = ({tech:viewTech, mgr:viewMgr, mech:viewMech, rec:viewRec, hr:viewHR, team:viewTeam}[state.ui.role])();
   save();
 }
 
@@ -803,6 +835,68 @@ function callDetail(c,q){
 /* =========================================================
    HR & ONBOARDING
    ========================================================= */
+/* =========================================================
+   TEAM DIRECTORY
+   ========================================================= */
+const DEPTS = ['All','Management','Field crews','Shop','Office'];
+function tenure(start){
+  const d = new Date(start+'T12:00:00'); if(d > TODAY) return 'Starts '+fmtDay(start);
+  const m = (TODAY.getFullYear()-d.getFullYear())*12 + TODAY.getMonth()-d.getMonth();
+  if(m < 1) return 'New this month'; const y = Math.floor(m/12), r = m%12;
+  return (y?y+' yr'+(y>1?'s':'')+' ':'')+(r?r+' mo':'');
+}
+function staffStatus(p){
+  if(p.techId){ const w = techWhere(tech(p.techId), state.jobs.filter(j=>j.date===dayKey(0)));
+    return {cls: w.kind==='on'?'b-green':w.kind==='drive'?'b-blue':'b-gray', txt: w.label}; }
+  if(p.empId){ const e = state.employees.find(x=>x.id===p.empId); if(e){ const pr = empProgress(e);
+    if(e.start > dayKey(0)) return {cls:'b-blue', txt:'Starts '+fmtDay(e.start)};
+    if(pr.pct < 100) return {cls:'b-brass', txt:'Onboarding · '+pr.pct+'%'}; } }
+  if(p.recId) return {cls:'b-green', txt:'At the front desk'};
+  if(p.start > dayKey(0)) return {cls:'b-blue', txt:'Starts '+fmtDay(p.start)};
+  return {cls:'b-gray', txt: p.dept==='Shop' ? 'In the shop' : p.dept==='Field crews' ? 'In the field' : 'In the office'};
+}
+function viewTeam(){
+  const ui = state.ui, q = (ui.teamSearch||'').trim().toLowerCase(), dept = ui.teamDept||'All';
+  const list = state.staff.filter(p => (dept==='All'||p.dept===dept) &&
+    (!q || [p.name,p.role,p.dept,p.branch,p.email,p.phone,p.about,...p.langs,...p.certs].join(' ').toLowerCase().includes(q)));
+  return `
+  <div class="page-head"><div><h2>Team directory</h2><p>Who's who at Colonial, and how to reach them. Everyone on staff can see this page.</p></div></div>
+  <div class="row wrap" style="margin-bottom:14px">
+    <input type="search" id="teamSearch" placeholder="Search name, role, skill, language…" value="${esc(ui.teamSearch||'')}" style="flex:1;min-width:200px;max-width:360px">
+    ${DEPTS.map(d=>`<button class="rec-chip ${dept===d?'on':''}" style="padding:5px 12px" data-action="teamDept" data-dept="${d}">${d} <span class="muted" style="font-weight:400">${d==='All'?state.staff.length:state.staff.filter(p=>p.dept===d).length}</span></button>`).join('')}
+  </div>
+  <div class="grid team-grid">
+    ${list.map(p=>{ const st = staffStatus(p); return `
+      <div class="card card-pad person" data-action="profile" data-id="${p.id}" tabindex="0">
+        <div class="row" style="align-items:flex-start"><span class="av av-lg">${initials(p.name)}</span>
+          <div style="min-width:0"><b>${esc(p.name)}</b><div class="small muted">${esc(p.role)}</div><div style="margin-top:6px"><span class="badge ${st.cls}">${esc(st.txt)}</span></div></div></div>
+        <div class="person-contact small">
+          <div class="row between"><span class="muted">Phone</span><span>${esc(p.phone)}</span></div>
+          <div class="row between"><span class="muted">Email</span><span class="trunc">${esc(p.email)}</span></div>
+          <div class="row between"><span class="muted">Branch</span><span>${esc(p.branch)}</span></div>
+        </div>
+      </div>`; }).join('') || '<div class="empty">No one matches that search.</div>'}
+  </div>
+  <div class="note" style="margin-top:16px">The directory shows work contact info only. Home addresses, emergency contacts, pay and HR documents stay in the HR section, visible only to HR and managers.</div>`;
+}
+function profileHTML(p){
+  const st = staffStatus(p);
+  const copyRow = (label,val) => `<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line)"><div style="min-width:0"><div class="small muted">${label}</div><div class="trunc" style="font-weight:600">${esc(val)}</div></div><button class="btn btn-sm" data-action="copy" data-val="${esc(val)}">Copy</button></div>`;
+  return `<div class="modal-head"><div class="row"><span class="av av-xl">${initials(p.name)}</span><div><h3>${esc(p.name)}</h3><div class="small muted">${esc(p.role)}</div><div style="margin-top:6px"><span class="badge ${st.cls}">${esc(st.txt)}</span></div></div></div><button class="x" data-action="closeModal">×</button></div>
+  <div class="modal-body stack">
+    <div>${copyRow('Work phone', p.phone)}${copyRow('Work email', p.email)}</div>
+    <dl class="kv">
+      <dt>Department</dt><dd>${esc(p.dept)}</dd>
+      <dt>Branch</dt><dd>${esc(p.branch)}</dd>
+      <dt>Start date</dt><dd>${new Date(p.start+'T12:00:00').toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'})} · ${tenure(p.start)}</dd>
+      <dt>Reports to</dt><dd>${esc(p.reportsTo)}</dd>
+      <dt>Languages</dt><dd>${esc(p.langs.join(', '))}</dd>
+      ${p.certs.length?`<dt>Certifications</dt><dd>${esc(p.certs.join(' · '))}</dd>`:''}
+    </dl>
+    <div><b>About</b><p style="margin:4px 0 0">${esc(p.about)}</p></div>
+  </div>`;
+}
+
 function empProgress(e){
   const pk = Object.values(e.paper), tk = Object.values(e.train).filter(v=>v!==null);
   const pd = pk.filter(Boolean).length, td = tk.filter(Boolean).length;
@@ -899,6 +993,13 @@ document.addEventListener('click', e=>{
     case 'vmDone': state.calls.find(c=>c.id===id).handled = true; toast('Voicemail marked as returned'); break;
     // hr
     case 'hrPick': ui.hrSel = id; break;
+    // team
+    case 'teamDept': ui.teamDept = el.dataset.dept; break;
+    case 'profile': openModal(profileHTML(state.staff.find(p=>p.id===id))); return;
+    case 'copy': { const v = el.dataset.val;
+      const fallback = () => { const r = document.createRange(); r.selectNodeContents(el.previousElementSibling.querySelector('.trunc')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast('Selected. Press copy on your device'); };
+      try { navigator.clipboard.writeText(v).then(()=>toast('Copied '+v), fallback); } catch(err){ fallback(); }
+      return; }
     case 'hrToggle': { const emp=state.employees.find(x=>x.id===id); const o=el.dataset.kind==='paper'?emp.paper:emp.train; o[el.dataset.k]=!o[el.dataset.k]; if(empProgress(emp).pct===100) toast(emp.name+' is fully onboarded 🎉'); break; }
     case 'newHire': openModal(newHireModal()); return;
     case 'createHire': {
@@ -906,7 +1007,10 @@ document.addEventListener('click', e=>{
       const role=document.getElementById('hRole').value;
       const emp={id:'E'+(state.nextEmp++), name, role, start:document.getElementById('hStart').value||dayKey(7), manager:role==='Receptionist'?'Office manager':role.includes('Mechanic')?'Shop lead':'Crew lead',
         paper:Object.fromEntries(state.paperwork.map(([k])=>[k,false])), train:Object.fromEntries(ROLE_TRAININGS[role].map(k=>[k,false]))};
-      state.employees.push(emp); ui.hrSel=emp.id; closeModal(); toast('Onboarding started for '+name); break; }
+      state.employees.push(emp); ui.hrSel=emp.id;
+      state.staff.push({id:'S'+emp.id, name, role, dept: role==='Receptionist'?'Office':role.includes('Mechanic')?'Shop':'Field crews', branch:'Yakima',
+        email: name.split(' ')[0][0].toLowerCase()+name.split(' ').slice(-1)[0].toLowerCase()+'@coloniallawn.com', phone:'(509) 555-01'+String(20+state.nextEmp).slice(-2),
+        start: emp.start, reportsTo: emp.manager, langs:['English'], certs:[], about:'New hire. Profile details get filled in during onboarding.', empId: emp.id}); closeModal(); toast('Onboarding started for '+name); break; }
     default: return;
   }
   render();
@@ -925,11 +1029,13 @@ document.addEventListener('change', e=>{
   render();
 });
 
+document.addEventListener('keydown', e=>{ if(e.key==='Enter' && e.target.classList?.contains('person')) e.target.click(); if(e.key==='Escape') closeModal(); });
+
 let searchT;
 document.addEventListener('input', e=>{
-  if(e.target.id!=='callSearch') return;
+  const id = e.target.id; if(id!=='callSearch' && id!=='teamSearch') return;
   clearTimeout(searchT);
-  searchT = setTimeout(()=>{ state.ui.search=e.target.value; const pos=e.target.selectionStart; render(); const s=document.getElementById('callSearch'); s.focus(); s.setSelectionRange(pos,pos); }, 200);
+  searchT = setTimeout(()=>{ state.ui[id==='callSearch'?'search':'teamSearch']=e.target.value; const pos=e.target.selectionStart; render(); const s=document.getElementById(id); s.focus(); s.setSelectionRange(pos,pos); }, 200);
 });
 
 /* simulated GPS fix: a moment to "locate", then a point near (or away from) the property */
