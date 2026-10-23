@@ -183,6 +183,14 @@ mark{background:#ffe79a;padding:0 1px;border-radius:2px}
 .x{background:none;border:0;font-size:22px;cursor:pointer;color:var(--muted);line-height:1}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green-900);color:#fff;padding:10px 16px;border-radius:10px;opacity:0;transition:.25s;z-index:60;pointer-events:none;max-width:calc(100% - 32px)}
 .toast.show{opacity:1;transform:translateX(-50%)}
+.map-layout{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:16px;align-items:start}
+@media (max-width:900px){.map-layout{grid-template-columns:minmax(0,1fr)}}
+.map-wrap svg{width:100%;height:auto;display:block}
+.map-st{font-size:13px;fill:#8b938d;font-weight:500}
+.map-lbl{font-size:14px;fill:#2b312d;font-weight:600;paint-order:stroke;stroke:#eef3ec;stroke-width:4px}
+.map-ini{font-size:12px;font-weight:700;fill:#fff;pointer-events:none}
+.map-pin{cursor:pointer}
+@media (prefers-reduced-motion:reduce){.map-pin animate{display:none}.pulse{animation:none}}
 .kv{display:grid;grid-template-columns:120px 1fr;gap:6px 12px;font-size:13px}
 .kv dt{color:var(--muted)}
 .kv dd{margin:0}
@@ -216,7 +224,14 @@ mark{background:#ffe79a;padding:0 1px;border-radius:2px}
    Everything is sample data, stored in this browser only.
    ========================================================= */
 
-const STORE_KEY = 'clg-ops-demo-v1';
+const STORE_KEY = 'clg-ops-demo-v2';
+
+/* ---------- location (schematic map units; 1 unit ≈ 26 ft) ---------- */
+const FT_PER_UNIT = 26.4, GEOFENCE_FT = 500;
+const YARD = {x:880, y:452};
+function near(p, d){ const a = Math.random()*2*Math.PI; return {x:p.x+Math.cos(a)*d, y:p.y+Math.sin(a)*d}; }
+function distFt(a,b){ return Math.hypot(a.x-b.x, a.y-b.y)*FT_PER_UNIT; }
+function fmtDist(ft){ return ft<1000 ? Math.max(5,Math.round(ft/5)*5)+' ft' : (ft/5280).toFixed(1)+' mi'; }
 const DAY = 86400000;
 
 /* ---------- date helpers ---------- */
@@ -240,7 +255,7 @@ function seed(){
   const now = Date.now();
   // Today's times anchored to the clock on the wall; falls back to "X ago" if that time hasn't happened yet.
   const at = (hhmm, ago) => { const [h,m]=hhmm.split(':').map(Number); const d=new Date(TODAY); d.setHours(h,m,0,0); return d.getTime() < now-5*60e3 ? d.getTime() : now-ago; };
-  const yest = hhmm => at(hhmm,0) - DAY;
+  const yest = hhmm => { const [h,m]=hhmm.split(':').map(Number); const d=new Date(TODAY); d.setDate(d.getDate()-1); d.setHours(h,m,0,0); return d.getTime(); };
   const callAt = hhmm => { const t = at(hhmm,-1); return t > now ? yest(hhmm) : t; };
   const techs = [
     {id:'T1', name:'Luis Ramirez',   crew:'Crew A · Maintenance', truck:'Truck 3'},
@@ -258,6 +273,8 @@ function seed(){
     C7:{name:'Valley Christian Church', contact:'Facilities: Dan Kerr', phone:'(509) 555-0195', address:'7700 W Nob Hill Blvd, Yakima', notes:'Avoid Wednesday evenings (youth group parking).', plan:'Commercial maintenance contract'},
     C8:{name:'Castillo Residence', contact:'Elena Castillo', phone:'(509) 555-0127', address:'602 Conestoga Blvd, Yakima', notes:'Asked for estimate on spring overseed.', plan:'Weekly maintenance (Apr–Oct)'},
   };
+  const POS = {C1:[600,92], C2:[505,150], C3:[625,378], C4:[225,178], C5:[478,205], C6:[680,330], C7:[232,400], C8:[170,300]};
+  for(const [k,[x,y]] of Object.entries(POS)) clients[k].pos = {x,y};
   const S = (name,price,tasks)=>({name,price,tasks});
   let jid = 1000;
   const J = (off,start,est,techId,clientId,services,extra={})=>({id:'J'+(++jid), date:dayKey(off), start, est, techId, clientId, services, status:'scheduled', clockIn:null, clockOut:null, done:[], ...extra});
@@ -284,6 +301,10 @@ function seed(){
     J(3,'08:00',60,'T2','C2',[S('Weekly commercial maintenance',140,['Mow','Blow lot'])]),
     J(3,'10:00',90,'T4','C8',[S('Spring overseed estimate walk',0,['Measure lawn','Photos for quote'])]),
   ];
+  jobs.forEach(j=>{ const p = clients[j.clientId].pos;
+    if(j.clockIn) j.inLoc = near(p, 0.8+Math.random()*2);
+    if(j.clockOut) j.outLoc = near(p, 0.8+Math.random()*2); });
+  jobs[0].outLoc = {x:clients.C2.pos.x+112, y:clients.C2.pos.y+38}; // clocked out from the road
   const equipment = [
     {id:'M-07', name:'Toro Z-Master 60" zero-turn', type:'Mower', status:'Down'},
     {id:'M-04', name:'Exmark Lazer Z 52"', type:'Mower', status:'OK'},
@@ -354,6 +375,7 @@ function seed(){
     ['dl','Driver\'s license copy + driving record check'],
     ['dt','Drug & alcohol policy acknowledgment'],
     ['uni','Uniform & PPE issued (boots, eye/ear protection)'],
+    ['gps','Location policy acknowledgment (tracked only while clocked in)'],
   ];
   const trainings = [
     ['saf','General safety orientation'],
@@ -371,7 +393,7 @@ function seed(){
     {id:'E21', name:'Marco Sandoval', role:'Landscape Technician', start:dayKey(-3), manager:'Crew A lead', paper:mk(paperwork,8), train:mk(trainings,5)},
     {id:'E22', name:'Jenna Wu', role:'Receptionist', start:dayKey(-1), manager:'Office manager', paper:mk(paperwork,5), train:Object.fromEntries(trainings.map(([k])=>[k,['saf','cs','app'].includes(k)?false:null]))},
     {id:'E23', name:'Derek Pollard', role:'Small Engine Mechanic', start:dayKey(4), manager:'Shop lead', paper:mk(paperwork,2), train:mk(trainings,0)},
-    {id:'E19', name:'Sofia Reyes', role:'Irrigation Technician', start:dayKey(-21), manager:'Crew B lead', paper:mk(paperwork,8), train:mk(trainings,9)},
+    {id:'E19', name:'Sofia Reyes', role:'Irrigation Technician', start:dayKey(-21), manager:'Crew B lead', paper:mk(paperwork,9), train:mk(trainings,9)},
   ];
   // Jenna: receptionist only needs a subset of trainings
   employees[1].train = {saf:true,cs:false,app:true};
@@ -396,6 +418,12 @@ const taskCount = j => j.services.reduce((a,s)=>a+s.tasks.length,0);
 const elapsed = j => j.clockIn ? ((j.clockOut||Date.now()) - j.clockIn) : 0;
 const statusBadge = s => ({scheduled:'<span class="badge b-blue">Scheduled</span>', in_progress:'<span class="badge b-green"><span class="dot pulse"></span>On site</span>', done:'<span class="badge b-gray">Complete</span>'}[s]);
 const prioBadge = p => `<span class="badge ${p==='High'?'b-red':p==='Medium'?'b-amber':'b-gray'}">${p}</span>`;
+function locBadge(j, which){
+  const loc = which==='out' ? j.outLoc : j.inLoc; if(!loc) return '';
+  const ft = distFt(loc, client(j.clientId).pos);
+  return ft <= GEOFENCE_FT ? `<span class="badge b-green">📍 At property · ${fmtDist(ft)}</span>` : `<span class="badge b-red">⚠ ${fmtDist(ft)} from property</span>`;
+}
+const locFlagged = j => [j.inLoc,j.outLoc].some(l=>l && distFt(l, client(j.clientId).pos) > GEOFENCE_FT);
 const eqBadge = s => `<span class="badge ${s==='Down'?'b-red':s==='OK'?'b-green':'b-amber'}">${s}</span>`;
 
 /* ---------- toast & modal ---------- */
@@ -448,9 +476,11 @@ function viewTech(){
         <li><b>Clock in</b> when the truck pulls up. The manager's live board switches that job to <i>On site</i> with a running timer.</li>
         <li><b>Check off tasks</b> as they're done. The checklist comes straight from what was sold, so nothing gets missed or done for free.</li>
         <li><b>Clock out</b> when you leave. Actual time on site goes to the timesheet next to the estimate, so the office can see which jobs are priced right.</li>
+        <li><b>Location check.</b> Clock-in and clock-out record where the phone is and compare it to the property. Managers see crews on a map, and anything over ${GEOFENCE_FT} ft from the property gets flagged. Location is shared only while clocked in.</li>
         <li><b>Equipment breaks?</b> Tap <i>Report equipment issue</i>. A ticket lands in the shop queue instantly with who, what and where.</li>
       </ol>
       <div class="note">Try it: open a scheduled job, clock in, then switch to the <b>Manager</b> tab to see it go live. Report an equipment issue, then check <b>Shop / Mechanics</b>.</div>
+      <label class="row small" style="margin-top:12px;cursor:pointer"><input type="checkbox" id="simAway" data-action="simAway" ${state.ui.simAway?'checked':''}> Demo: pretend this tech clocks in or out away from the property</label>
     </div>
   </div>`;
 }
@@ -508,14 +538,16 @@ function phoneJob(t, j){
   const taskTotal = taskCount(j);
   const pct = Math.round(j.done.length/taskTotal*100);
   let clockBlock;
-  if(j.status==='scheduled') clockBlock = `<button class="btn btn-primary btn-big" data-action="clockIn" data-id="${j.id}">Clock in · arrived on site</button>`;
-  else if(j.status==='in_progress') clockBlock = `<div class="card card-pad" style="text-align:center;margin-bottom:10px"><div class="small muted">On site since ${fmtTime(j.clockIn)}</div><div class="timer" data-live="${j.id}">${fmtDur(elapsed(j))}</div><div class="small muted">Estimate: ${j.est} min</div></div>
-      <button class="btn btn-danger btn-big" data-action="clockOut" data-id="${j.id}">Clock out · leaving site</button>`;
-  else clockBlock = `<div class="card card-pad" style="text-align:center"><span class="badge b-gray">Complete</span><div class="small muted" style="margin-top:6px">${j.clockIn?`${fmtTime(j.clockIn)} – ${fmtTime(j.clockOut)} · ${fmtHM(elapsed(j))} on site (est. ${j.est} min)`:'Completed'}</div></div>`;
+  const locating = state.ui.locating===j.id ? `<button class="btn btn-big" disabled>📍 Checking your location…</button>` : '';
+  if(j.status==='scheduled') clockBlock = locating || `<button class="btn btn-primary btn-big" data-action="clockIn" data-id="${j.id}">Clock in · arrived on site</button>`;
+  else if(j.status==='in_progress') clockBlock = `<div class="card card-pad" style="text-align:center;margin-bottom:10px"><div class="small muted">On site since ${fmtTime(j.clockIn)}</div><div class="timer" data-live="${j.id}">${fmtDur(elapsed(j))}</div><div class="small muted">Estimate: ${j.est} min</div><div style="margin-top:8px">${locBadge(j,'in')}</div></div>
+      ${locating || `<button class="btn btn-danger btn-big" data-action="clockOut" data-id="${j.id}">Clock out · leaving site</button>`}`;
+  else clockBlock = `<div class="card card-pad" style="text-align:center"><span class="badge b-gray">Complete</span><div class="small muted" style="margin-top:6px">${j.clockIn?`${fmtTime(j.clockIn)} – ${fmtTime(j.clockOut)} · ${fmtHM(elapsed(j))} on site (est. ${j.est} min)`:'Completed'}</div>${j.inLoc?`<div class="row wrap" style="justify-content:center;margin-top:8px"><span class="small muted">In</span>${locBadge(j,'in')}<span class="small muted">Out</span>${locBadge(j,'out')}</div>`:''}</div>`;
   return `
     <div class="app-head"><button class="back" data-action="closeJob">← Today's jobs</button><div class="nm">${esc(c.name)}</div><div class="small" style="opacity:.85">${fmt12(j.start)} · ${esc(c.plan)}</div></div>
     <div class="app-body">
       ${clockBlock}
+      <p class="small muted" style="margin:8px 2px 0;text-align:center">📍 Your location is shared with the office only while you're clocked in.</p>
       <div class="card card-pad" style="margin-top:12px">
         <h3>Client</h3>
         <dl class="kv"><dt>Contact</dt><dd>${esc(c.contact)}</dd><dt>Phone</dt><dd>${esc(c.phone)}</dd><dt>Address</dt><dd>${esc(c.address)}</dd></dl>
@@ -566,7 +598,7 @@ function viewMgr(){
           const over = elapsed(cur) > cur.est*60e3;
           return `<tr class="click" data-action="jobModal" data-id="${cur.id}"><td><b>${esc(t.name)}</b><div class="small muted">${esc(t.crew)}</div></td>
             <td>${esc(client(cur.clientId).name)}<div class="small muted">${esc(cur.services[0].name)}</div></td>
-            <td><span class="dot pulse"></span> <b data-live="${cur.id}">${fmtDur(elapsed(cur))}</b><div class="small ${over?'':'muted'}" style="${over?'color:var(--red)':''}">est. ${cur.est} min${over?' · over':''}</div></td>
+            <td><span class="dot pulse"></span> <b data-live="${cur.id}">${fmtDur(elapsed(cur))}</b><div class="small ${over?'':'muted'}" style="${over?'color:var(--red)':''}">est. ${cur.est} min${over?' · over':''}</div><div style="margin-top:4px">${locBadge(cur,'in')}</div></td>
             <td style="min-width:90px"><div class="progress"><i style="width:${Math.round(cur.done.length/taskCount(cur)*100)}%"></i></div><div class="small muted">${cur.done.length}/${taskCount(cur)}</div></td></tr>`;
         }).join('')}</tbody></table></div>
     </div>
@@ -575,11 +607,13 @@ function viewMgr(){
       <div class="stack">
         ${openT.filter(t=>t.priority==='High').map(t=>`<div class="row" style="align-items:flex-start"><span class="badge b-red">Down</span><div class="small"><b>${esc(equip(t.equipId).name)}</b> (${t.id})<br><span class="muted">${esc(t.title)}</span></div></div>`).join('')}
         ${state.calls.filter(c=>c.type==='voicemail'&&!c.handled).map(c=>`<div class="row" style="align-items:flex-start"><span class="badge b-amber">Voicemail</span><div class="small"><b>${esc(c.caller)}</b> · ${fmtDateTime(c.ts)}<br><span class="muted">${esc(c.summary)}</span></div></div>`).join('')}
+        ${today.filter(locFlagged).map(j=>{ const bad = j.outLoc && distFt(j.outLoc, client(j.clientId).pos)>GEOFENCE_FT ? 'out' : 'in'; return `<div class="row" style="align-items:flex-start"><span class="badge b-red">Location</span><div class="small"><b>${esc(tech(j.techId).name)}</b> clocked ${bad} ${fmtDist(distFt(bad==='out'?j.outLoc:j.inLoc, client(j.clientId).pos))} from ${esc(client(j.clientId).name)}<br><span class="muted">Hours may need review before payroll.</span></div></div>`; }).join('')}
         ${today.filter(j=>j.status==='in_progress' && elapsed(j)>j.est*60e3).map(j=>`<div class="row" style="align-items:flex-start"><span class="badge b-red">Over estimate</span><div class="small"><b>${esc(client(j.clientId).name)}</b><br><span class="muted">${esc(tech(j.techId).name)} · est. ${j.est} min</span></div></div>`).join('')}
         <div class="row" style="align-items:flex-start"><span class="badge b-green">Revenue</span><div class="small"><b>${money(revenue)}</b> in completed work today</div></div>
       </div>
     </div>
   </div>
+  ${crewMap(today)}
   <div class="card card-pad">
     <div class="row between wrap" style="margin-bottom:10px"><h3 style="margin:0">Week schedule</h3>
       <div class="row small"><span class="badge b-blue">Scheduled</span><span class="badge b-green">On site</span><span class="badge b-gray">Complete</span></div></div>
@@ -592,11 +626,52 @@ function viewMgr(){
   </div>`;
 }
 
+function techWhere(t, today){
+  const mine = today.filter(j=>j.techId===t.id);
+  const cur = mine.find(j=>j.status==='in_progress');
+  if(cur) return {p:cur.inLoc||client(cur.clientId).pos, kind:'on', job:cur, label:'On site · '+client(cur.clientId).name};
+  const last = mine.filter(j=>j.status==='done'&&j.clockOut).sort((a,b)=>b.clockOut-a.clockOut)[0];
+  const next = mine.filter(j=>j.status==='scheduled').sort((a,b)=>a.start.localeCompare(b.start))[0];
+  if(last && next){ const a=client(last.clientId).pos, b=client(next.clientId).pos; return {p:{x:(a.x+b.x)/2,y:(a.y+b.y)/2}, kind:'drive', job:next, label:'Driving to '+client(next.clientId).name}; }
+  if(next) return {p:{x:YARD.x-14+t.id.charCodeAt(1)%4*9,y:YARD.y-6}, kind:'yard', job:next, label:'At the yard · next '+client(next.clientId).name};
+  return {p:{x:YARD.x+8,y:YARD.y+8}, kind:'yard', job:null, label:'Done for the day'};
+}
+function crewMap(today){
+  const H = [['Englewood Ave',92],['Summitview Ave',150],['Lincoln Ave',205],['Yakima Ave',258],['Tieton Dr',330],['Nob Hill Blvd',400],['Washington Ave',470]];
+  const V = [['16th Ave',850],['24th Ave',760],['40th Ave',600],['48th Ave',520],['56th Ave',440],['64th Ave',360],['72nd Ave',280],['80th Ave',200]];
+  const sites = [...new Set(today.map(j=>j.clientId))];
+  const where = state.techs.map(t=>({t, ...techWhere(t,today)}));
+  const color = {on:'var(--green-700)', drive:'var(--blue)', yard:'#7a807c'};
+  return `<div class="card card-pad" style="margin-bottom:16px">
+    <div class="row between wrap" style="margin-bottom:10px"><h3 style="margin:0">Crew map</h3>
+      <div class="row small wrap"><span class="badge b-green">On site</span><span class="badge b-blue">Driving</span><span class="badge b-gray">At yard</span></div></div>
+    <div class="map-layout">
+      <div class="map-wrap"><svg viewBox="0 0 1000 540" role="img" aria-label="Schematic map of Yakima with crew locations">
+        <rect width="1000" height="540" rx="10" fill="#eef3ec"/>
+        <path d="M940 0 C 925 140, 960 300, 930 540 L1000 540 L1000 0Z" fill="#d6e6ef"/>
+        ${H.map(([n,y])=>`<line x1="0" y1="${y}" x2="1000" y2="${y}" stroke="#fff" stroke-width="${n.includes('Ave')&&!n.includes('Summitview')?5:8}"/><text x="12" y="${y-6}" class="map-st">${n}</text>`).join('')}
+        ${V.map(([n,x])=>`<line x1="${x}" y1="0" x2="${x}" y2="540" stroke="#fff" stroke-width="5"/><text x="${x+5}" y="530" class="map-st">${n}</text>`).join('')}
+        <g><rect x="${YARD.x-26}" y="${YARD.y-22}" width="52" height="44" rx="6" fill="#fff" stroke="#9aa39d"/><text x="${YARD.x}" y="${YARD.y+36}" text-anchor="middle" class="map-lbl">Shop / yard</text></g>
+        ${sites.map(id=>{ const c=client(id); return `<circle cx="${c.pos.x}" cy="${c.pos.y}" r="${GEOFENCE_FT/FT_PER_UNIT}" fill="rgba(59,135,65,.10)" stroke="rgba(59,135,65,.35)" stroke-dasharray="3 3"/><circle cx="${c.pos.x}" cy="${c.pos.y}" r="4" fill="#5c635e"/><text x="${c.pos.x+10}" y="${c.pos.y-10}" class="map-lbl">${esc(c.name)}</text>`; }).join('')}
+        ${where.map(w=>`<g class="map-pin" ${w.job?`data-action="jobModal" data-id="${w.job.id}"`:''}>
+          ${w.kind==='on'?`<circle cx="${w.p.x}" cy="${w.p.y}" r="14" fill="none" stroke="${color.on}" stroke-width="2"><animate attributeName="r" values="14;26" dur="1.8s" repeatCount="indefinite"/><animate attributeName="opacity" values=".8;0" dur="1.8s" repeatCount="indefinite"/></circle>`:''}
+          <circle cx="${w.p.x}" cy="${w.p.y}" r="15" fill="${color[w.kind]}" stroke="#fff" stroke-width="3"/>
+          <text x="${w.p.x}" y="${w.p.y+4}" text-anchor="middle" class="map-ini">${initials(w.t.name)}</text></g>`).join('')}
+      </svg></div>
+      <div class="stack">
+        ${where.map(w=>`<div class="row" style="align-items:flex-start;${w.job?'cursor:pointer':''}" ${w.job?`data-action="jobModal" data-id="${w.job.id}"`:''}><span class="av" style="background:${color[w.kind]}">${initials(w.t.name)}</span><div class="small"><b>${esc(w.t.name)}</b><br><span class="muted">${esc(w.label)}</span></div></div>`).join('')}
+        <p class="small muted" style="margin:6px 0 0">Schematic map with sample positions. The real build uses a street map and the phone's GPS. Dashed circles show the ${GEOFENCE_FT} ft zone around each property.</p>
+      </div>
+    </div>
+  </div>`;
+}
+
 function jobModalHTML(j){
   const c = client(j.clientId), t = tech(j.techId);
   return `<div class="modal-head"><div><h3>${esc(c.name)}</h3><div class="small muted">${fmtDay(j.date)} · ${fmt12(j.start)} · ${esc(t.name)}</div></div><button class="x" data-action="closeModal">×</button></div>
   <div class="modal-body stack">
     <div>${statusBadge(j.status)} ${j.clockIn?`<span class="small muted">Clocked in ${fmtTime(j.clockIn)}${j.clockOut?` · out ${fmtTime(j.clockOut)} · ${fmtHM(elapsed(j))}`:''} (est. ${j.est} min)</span>`:''}</div>
+    ${j.inLoc?`<div class="row wrap"><span class="small muted">Clock-in</span>${locBadge(j,'in')}${j.outLoc?`<span class="small muted">Clock-out</span>${locBadge(j,'out')}`:''}</div>`:''}
     <dl class="kv"><dt>Contact</dt><dd>${esc(c.contact)} · ${esc(c.phone)}</dd><dt>Address</dt><dd>${esc(c.address)}</dd><dt>Plan</dt><dd>${esc(c.plan)}</dd><dt>Site notes</dt><dd>${esc(c.notes)}</dd></dl>
     <div><b>Services</b>${j.services.map(s=>`<div class="svc"><span>${esc(s.name)}</span><b>${s.price?money(s.price):'Project'}</b></div>`).join('')}
       <div class="svc"><b>Total</b><b>${jobTotal(j)?money(jobTotal(j)):'Per project contract'}</b></div></div>
@@ -787,8 +862,8 @@ document.addEventListener('click', e=>{
     case 'openJob': ui.techJob = id; break;
     case 'closeJob': ui.techJob = null; ui.techTab='today'; break;
     case 'techTab': ui.techTab = el.dataset.tab; if(el.dataset.tab!=='report') ui.techJob=null; else ui.reportFrom = ui.techJob; ui.techJob = null; break;
-    case 'clockIn': { const j=job(id); const other=state.jobs.find(x=>x.techId===j.techId&&x.status==='in_progress'); if(other){ toast('Clock out of '+client(other.clientId).name+' first'); return; } j.status='in_progress'; j.clockIn=Date.now(); toast('Clocked in at '+fmtTime(j.clockIn)); break; }
-    case 'clockOut': { const j=job(id); const left=taskCount(j)-j.done.length; j.status='done'; j.clockOut=Date.now(); toast('Clocked out · '+fmtHM(elapsed(j))+' on site'+(left?` · ${left} task${left>1?'s':''} left unchecked`:'')); break; }
+    case 'clockIn': { const j=job(id); const other=state.jobs.find(x=>x.techId===j.techId&&x.status==='in_progress'); if(other){ toast('Clock out of '+client(other.clientId).name+' first'); return; } locate(j, ()=>{ j.status='in_progress'; j.clockIn=Date.now(); j.inLoc=fakeFix(j); toast('Clocked in at '+fmtTime(j.clockIn)+(distFt(j.inLoc,client(j.clientId).pos)>GEOFENCE_FT?' · flagged: away from property':'')); }); return; }
+    case 'clockOut': { const j=job(id); const left=taskCount(j)-j.done.length; locate(j, ()=>{ j.status='done'; j.clockOut=Date.now(); j.outLoc=fakeFix(j); toast('Clocked out · '+fmtHM(elapsed(j))+' on site'+(left?` · ${left} task${left>1?'s':''} left unchecked`:'')); }); return; }
     case 'toggleTask': { const j=job(id); const k=el.dataset.k; j.done = j.done.includes(k)? j.done.filter(x=>x!==k) : [...j.done,k]; break; }
     case 'submitReport': {
       const title=document.getElementById('rTitle').value.trim(); if(!title){ toast('Describe what\'s wrong'); return; }
@@ -830,6 +905,7 @@ document.addEventListener('click', e=>{
 
 document.addEventListener('change', e=>{
   const el = e.target; const a = el.dataset.action; if(!a) return;
+  if(a==='simAway'){ state.ui.simAway = el.checked; save(); return; }
   if(a==='techPick'){ state.ui.techId=el.value; state.ui.techJob=null; state.ui.techTab='today'; }
   else if(a==='callFilter'){ state.ui.callFilter=el.value; }
   else if(a==='reassign'){ const j=job(el.dataset.id); j.techId=el.value; toast('Reassigned to '+tech(el.value).name); closeModal(); }
@@ -846,6 +922,10 @@ document.addEventListener('input', e=>{
   clearTimeout(searchT);
   searchT = setTimeout(()=>{ state.ui.search=e.target.value; const pos=e.target.selectionStart; render(); const s=document.getElementById('callSearch'); s.focus(); s.setSelectionRange(pos,pos); }, 200);
 });
+
+/* simulated GPS fix: a moment to "locate", then a point near (or away from) the property */
+function fakeFix(j){ return near(client(j.clientId).pos, state.ui.simAway ? 45+Math.random()*60 : 0.8+Math.random()*2.5); }
+function locate(j, done){ state.ui.locating = j.id; render(); setTimeout(()=>{ state.ui.locating = null; done(); render(); }, 900); }
 
 /* live timers */
 setInterval(()=>{

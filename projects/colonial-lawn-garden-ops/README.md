@@ -18,6 +18,16 @@ Open [index.html](index.html) in a browser. It runs from one file and saves demo
 | Reception | Call log | Calls and voicemails with recording, transcript and AI summary, filed by receptionist ID (REC-01, REC-02…), full-text search across transcripts, mark voicemails returned |
 | HR | Onboarding | New hires with paperwork + training checklists templated by role, progress per person |
 
+## Technician location
+
+- **Location check at clock-in/out:** the phone's location is recorded and compared to the property. Anything over 500 ft away is flagged on the manager's "needs attention" list so hours can be reviewed before payroll.
+- **Crew map:** managers see who's on site, who's driving to the next job, and who's at the yard. The mockup uses a schematic map of Yakima with sample positions; the real build uses a street map.
+- **Only while clocked in:** location is never collected off the clock, and every tech signs a location policy acknowledgment during onboarding.
+
+Real-build notes:
+- A web app can read location at clock-in/out and while it's open on screen. Continuous background tracking (e.g. a breadcrumb trail all day) needs a native app or GPS units in the trucks. Clock-in/out checks are the simplest place to start.
+- Techs on personal phones are the main privacy concern. Tracking only while clocked in, telling employees exactly what's recorded, and putting it in writing keeps it fair. Have the company review its policy with whoever handles its HR or legal questions.
+
 ## The demo story (how to pitch it)
 
 The pieces are connected, which is the main selling point:
